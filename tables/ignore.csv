@@ -1,0 +1,40 @@
+"","CDM_Tables","table_catalog","table_schema","Repo_Tables","table_type","self_referencing_column_name","reference_generation","user_defined_type_catalog","user_defined_type_schema","user_defined_name","Rows","TotalSizeKB","loaded","available","index"
+"1","attribute_definition","mycdm","cmsdesynpuf23m","attribute_definition","BASE TABLE",NA,NA,NA,NA,NA,NA,NA,"Yes","No",1
+"2","care_site","mycdm","cmsdesynpuf23m","care_site","BASE TABLE",NA,NA,NA,NA,NA,320545,39000,"Yes","Yes",1
+"3","cdm_source","mycdm","cmsdesynpuf23m","cdm_source","BASE TABLE",NA,NA,NA,NA,NA,NA,NA,"Yes","No",1
+"4","cohort","mycdm","cmsdesynpuf23m","cohort","BASE TABLE",NA,NA,NA,NA,NA,NA,NA,"Yes","No",1
+"5","cohort_attribute","mycdm","cmsdesynpuf23m","cohort_attribute","BASE TABLE",NA,NA,NA,NA,NA,NA,NA,"Yes","No",1
+"6","cohort_definition","mycdm","cmsdesynpuf23m","cohort_definition","BASE TABLE",NA,NA,NA,NA,NA,NA,NA,"Yes","No",1
+"7","concept","mycdm","cmsdesynpuf23m","concept","BASE TABLE",NA,NA,NA,NA,NA,4733057,618000,"Yes","Yes",1
+"8","concept_ancestor","mycdm","cmsdesynpuf23m","concept_ancestor","BASE TABLE",NA,NA,NA,NA,NA,122999501,5886000,"Yes","Yes",1
+"9","concept_class","mycdm","cmsdesynpuf23m","concept_class","BASE TABLE",NA,NA,NA,NA,NA,312,18000,"Yes","Yes",1
+"10","concept_relationship","mycdm","cmsdesynpuf23m","concept_relationship","BASE TABLE",NA,NA,NA,NA,NA,30872886,1578000,"Yes","Yes",1
+"11","concept_synonym","mycdm","cmsdesynpuf23m","concept_synonym","BASE TABLE",NA,NA,NA,NA,NA,6301515,837000,"Yes","Yes",1
+"12","condition_era","mycdm","cmsdesynpuf23m","condition_era","BASE TABLE",NA,NA,NA,NA,NA,223393336,5422000,"Yes","Yes",1
+"13","condition_occurrence","mycdm","cmsdesynpuf23m","condition_occurrence","BASE TABLE",NA,NA,NA,NA,NA,289182385,8313000,"Yes","Yes",1
+"14","death","mycdm","cmsdesynpuf23m","death","BASE TABLE",NA,NA,NA,NA,NA,107644,60000,"Yes","Yes",1
+"15","device_cost",NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,"No","No",1
+"16","device_exposure","mycdm","cmsdesynpuf23m","device_exposure","BASE TABLE",NA,NA,NA,NA,NA,4465481,180000,"Yes","Yes",1
+"17","domain","mycdm","cmsdesynpuf23m","domain","BASE TABLE",NA,NA,NA,NA,NA,39,18000,"Yes","Yes",1
+"18","dose_era","mycdm","cmsdesynpuf23m","dose_era","BASE TABLE",NA,NA,NA,NA,NA,NA,NA,"Yes","No",1
+"19","drug_cost",NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,"No","No",1
+"20","drug_era","mycdm","cmsdesynpuf23m","drug_era","BASE TABLE",NA,NA,NA,NA,NA,125872351,2689000,"Yes","Yes",1
+"21","drug_exposure","mycdm","cmsdesynpuf23m","drug_exposure","BASE TABLE",NA,NA,NA,NA,NA,126048050,4898000,"Yes","Yes",1
+"22","drug_strength","mycdm","cmsdesynpuf23m","drug_strength","BASE TABLE",NA,NA,NA,NA,NA,NA,NA,"Yes","No",1
+"23","fact_relationship","mycdm","cmsdesynpuf23m","fact_relationship","BASE TABLE",NA,NA,NA,NA,NA,NA,NA,"Yes","No",1
+"24","location","mycdm","cmsdesynpuf23m","location","BASE TABLE",NA,NA,NA,NA,NA,3185,33000,"Yes","Yes",1
+"25","measurement","mycdm","cmsdesynpuf23m","measurement","BASE TABLE",NA,NA,NA,NA,NA,74128429,1587000,"Yes","Yes",1
+"26","note","mycdm","cmsdesynpuf23m","note","BASE TABLE",NA,NA,NA,NA,NA,NA,NA,"Yes","No",1
+"27","observation","mycdm","cmsdesynpuf23m","observation","BASE TABLE",NA,NA,NA,NA,NA,37531051,1018000,"Yes","Yes",1
+"28","observation_period","mycdm","cmsdesynpuf23m","observation_period","BASE TABLE",NA,NA,NA,NA,NA,2098515,60000,"Yes","Yes",1
+"29","payer_plan_period","mycdm","cmsdesynpuf23m","payer_plan_period","BASE TABLE",NA,NA,NA,NA,NA,7789512,204000,"Yes","Yes",1
+"30","person","mycdm","cmsdesynpuf23m","person","BASE TABLE",NA,NA,NA,NA,NA,2326856,168000,"Yes","Yes",1
+"31","procedure_cost",NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,"No","No",1
+"32","procedure_occurrence","mycdm","cmsdesynpuf23m","procedure_occurrence","BASE TABLE",NA,NA,NA,NA,NA,278769529,6891000,"Yes","Yes",1
+"33","provider","mycdm","cmsdesynpuf23m","provider","BASE TABLE",NA,NA,NA,NA,NA,905492,123000,"Yes","Yes",1
+"34","relationship","mycdm","cmsdesynpuf23m","relationship","BASE TABLE",NA,NA,NA,NA,NA,426,27000,"Yes","Yes",1
+"35","source_to_concept_map","mycdm","cmsdesynpuf23m","source_to_concept_map","BASE TABLE",NA,NA,NA,NA,NA,NA,NA,"Yes","No",1
+"36","specimen","mycdm","cmsdesynpuf23m","specimen","BASE TABLE",NA,NA,NA,NA,NA,NA,NA,"Yes","No",1
+"37","visit_cost",NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,"No","No",1
+"38","visit_occurrence","mycdm","cmsdesynpuf23m","visit_occurrence","BASE TABLE",NA,NA,NA,NA,NA,111637582,4345000,"Yes","Yes",1
+"39","vocabulary","mycdm","cmsdesynpuf23m","vocabulary","BASE TABLE",NA,NA,NA,NA,NA,58,24000,"Yes","Yes",1
