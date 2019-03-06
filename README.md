@@ -3,7 +3,10 @@ Re-engineering the DQe-c Data Quality package
 
 # Description
 We are re-building the original DQe-c from scratch in python to make it more scalable and adaptable.
-### Proposed high level workflow
 
+## Proposed high level workflow
 ![workflow](images/workflow.png)
 
+
+## Proposed Structure of Modules
+![workflow](images/modules.jpg)
