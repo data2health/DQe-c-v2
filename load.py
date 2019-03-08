@@ -6,3 +6,7 @@ compares the expected tables from the CDM csv files to the actual tables in the 
 expected input: DQTBL
 expected output: tablelist.csv
 """
+
+class Load:
+    def __init__(self, connection):
+        self.conn = connection
