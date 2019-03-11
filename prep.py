@@ -11,6 +11,7 @@ DQTBL is created from the CDM.csv files
 from .load import Load
 
 import json
+import CDMs, pandas
 import cx_Oracle as oracle
 import psycopg2 as postgresql
 import pyodbc as sqlserver
@@ -62,5 +63,11 @@ class Prep:
 
         return Load(conn)
 
-# TODO: How are the CDMs .csv files loaded? Is it based on the databases? or are they separate?
-#       E.g., is OMOP for a specific database?
+    def DQTBL(self, CDM: str) -> object:
+        return {
+            "PCORNET3": pandas.read_csv("./CDMs/DQTBL_pcornet_v3.csv"),
+            "PCORNET31": pandas.read_csv("./CDMs/DQTBL_pcornet_v31.csv"),
+            "OMOPV5_0": pandas.read_csv("./CDMs/DQTBL_omop_v5_0.csv"),
+            "OMOPV5_2": pandas.read_csv("./CDMs/DQTBL_omop_v5_2.csv"),
+            "OMOPV5_3": pandas.read_csv("./CDMs/DQTBL_omop_v5_3.csv")
+        }[CDM]
