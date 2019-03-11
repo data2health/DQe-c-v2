@@ -9,7 +9,6 @@ DQTBL is created from the CDM.csv files
 """
 
 from .load import Load
-import typing
 
 import json
 import CDMs, pandas
@@ -26,12 +25,12 @@ class Prep:
         self.password: str = self.config["Credentials"]["Password"]
         self.database: str = self.config["DBMS"]
         self.DQTBL: object = {
-            "PCORNET3": pandas.read_csv("./CDMs/DQTBL_pcornet_v3.csv"),
-            "PCORNET31": pandas.read_csv("./CDMs/DQTBL_pcornet_v31.csv"),
-            "OMOPV5_0": pandas.read_csv("./CDMs/DQTBL_omop_v5_0.csv"),
-            "OMOPV5_2": pandas.read_csv("./CDMs/DQTBL_omop_v5_2.csv"),
-            "OMOPV5_3": pandas.read_csv("./CDMs/DQTBL_omop_v5_3.csv")
-        }[CDM]
+                                "PCORNET3": pandas.read_csv("./CDMs/DQTBL_pcornet_v3.csv"),
+                                "PCORNET31": pandas.read_csv("./CDMs/DQTBL_pcornet_v31.csv"),
+                                "OMOPV5_0": pandas.read_csv("./CDMs/DQTBL_omop_v5_0.csv"),
+                                "OMOPV5_2": pandas.read_csv("./CDMs/DQTBL_omop_v5_2.csv"),
+                                "OMOPV5_3": pandas.read_csv("./CDMs/DQTBL_omop_v5_3.csv"),
+                             }[CDM]
 
     def Oracle(self):
         conn = oracle.connect(self.user + "/" + self.password + "@" + self.database)
