@@ -8,5 +8,6 @@ expected output: tablelist.csv
 """
 
 class Load:
-    def __init__(self, connection):
+    def __init__(self, connection, DQTBL):
         self.conn = connection
+        self.DQTBL = DQTBL
