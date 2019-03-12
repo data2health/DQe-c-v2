@@ -33,7 +33,7 @@ class Prep:
                                 "OMOPV5_0": pandas.read_csv("./CDMs/DQTBL_omop_v5_0.csv"),
                                 "OMOPV5_2": pandas.read_csv("./CDMs/DQTBL_omop_v5_2.csv"),
                                 "OMOPV5_3": pandas.read_csv("./CDMs/DQTBL_omop_v5_3.csv"),
-                             }[CDM]
+                             }[self.CDM]
 
         if self.DBMS == "oracle":
             self.conn = self.Oracle()
@@ -43,8 +43,10 @@ class Prep:
             self.conn = self.Redshift()
         elif self.DBMS == "sql server":
             self.conn = self.SQLServer()
+        elif self.DBMS == "":
+            raise NameError("No DBMS defined in config.json")
         else:
-            raise NameError("No Common Data Model (CDM) defined in config.json")
+            raise NameError("'%s' is not an accepted DBMS" % self.DBMS)
 
     def Oracle(self):
         conn = oracle.connect(self.user + "/" + self.password + "@" + self.database)
