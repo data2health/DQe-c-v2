@@ -1,0 +1,21 @@
+{   
+    "DBMS": "DBMS",
+
+    "CDM": "CDM",
+
+    "Credentials": {
+        "User": "username",
+        "Password": "password"
+    },
+
+    "ConnectionDetails": {
+        "Host": "host",
+        "Port": "port",
+        "Server": "server",
+        "Driver": "driver"
+    },
+
+    "Organization": "organization name",
+    
+    "Name": "name"
+}
