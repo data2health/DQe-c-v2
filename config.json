@@ -1,7 +1,12 @@
 {   
+
     "DBMS": "DBMS",
 
+    "database": "database name",
+
     "CDM": "CDM",
+
+    "schema": "schema",
 
     "Credentials": {
         "User": "username",
