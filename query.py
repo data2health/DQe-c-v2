@@ -32,7 +32,7 @@ class Query:
     
     def dbSize(self):
         if self.DBMS == "sql server":
-        SELECT 
+        """SELECT 
             t.NAME AS Repo_Tables,
             p.rows AS Rows,
             SUM(a.total_pages) * 8 AS TotalSizeKB
@@ -91,4 +91,4 @@ SELECT
     pg.reltuples::BIGINT, 
     pg_relation_size(tabs.table_name)/1000
 FROM pg_catalog.pg_class pg, information_schema.tables tabs
-WHERE tabs.table_name=pg.relname AND tabs.table_schema='public' ;
+WHERE tabs.table_name=pg.relname AND tabs.table_schema='public' ;"""
