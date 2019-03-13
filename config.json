@@ -1,26 +1,26 @@
 {   
 
-    "DBMS": "DBMS",
+    "DBMS": "postgresql",
 
-    "database": "database name",
+    "database": "dq_prod",
 
-    "CDM": "CDM",
+    "CDM": "OMOPV5_0",
 
-    "schema": "schema",
+    "schema": "yakima",
 
     "Credentials": {
-        "User": "username",
-        "Password": "password"
+        "User": "trberg",
+        "Password": "boyisthissomepassword!"
     },
 
     "ConnectionDetails": {
-        "Host": "host",
-        "Port": "port",
+        "Host": "localhost",
+        "Port": "8080",
         "Server": "server",
         "Driver": "driver"
     },
 
-    "Organization": "organization name",
+    "Organization": "DataQuest",
     
-    "Name": "name"
+    "Name": "Tim Bergquist"
 }

@@ -15,24 +15,18 @@ import json
 from query import Query
 
 class Orphan:
-    def __init__(self, CDM: str):
+    def __init__(self, prep: object, query: object):
         # ==================================
-        # TODO: change to take the already 
-        # created DQTBL from prep.py instead of CDM
+        # Initiates the orphan class
+        # creates the DQTBL object
         # ==================================
-        with open('config.json') as json_file:
-            self.config = json.load(json_file)
-        
-        self.DQTBL: object = {
-                                "PCORNET3": pandas.read_csv("./CDMs/DQTBL_pcornet_v3.csv"),
-                                "PCORNET31": pandas.read_csv("./CDMs/DQTBL_pcornet_v31.csv"),
-                                "OMOPV5_0": pandas.read_csv("./CDMs/DQTBL_omop_v5_0.csv"),
-                                "OMOPV5_2": pandas.read_csv("./CDMs/DQTBL_omop_v5_2.csv"),
-                                "OMOPV5_3": pandas.read_csv("./CDMs/DQTBL_omop_v5_3.csv"),
-                             }[CDM]
+
+        self.DQTBL = prep.DQTBL
+        self.prep = prep
+        self.query = query
 
 
-    def getRefPrim(self):
+    def getRefPrime(self):
 
         ## gather primary keys from DQTBL
         primaryPairs: object = self.DQTBL[(self.DQTBL["primary"]) & (self.DQTBL["cat"].isin(["clinical", "health_system"]))][["ColNam", "TabNam"]]
@@ -51,5 +45,9 @@ class Orphan:
 
     
     def orphanCalc(self):
-        q = Query()
-        refPrim = self.getRefPrim()
+        q = Query(self.prep)
+        refPrime = self.getRefPrime()
+
+        #refPrime["CountOut"] = refPrime.apply(lambda row: q.Orphan(row["TabNam_primary"], row["TabNam_reference"], row["ColNam"])["count"], axis=1)
+
+        print (refPrime)
