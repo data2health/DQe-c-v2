@@ -23,9 +23,11 @@ class Prep:
 
         self.CDM: str = self.config["CDM"].upper()
         self.DBMS: str = self.config["DBMS"].lower()
-        self.user: str = self.config["Credentials"]["User"]
-        self.password: str = self.config["Credentials"]["Password"]
-        self.database: str = self.config["DBMS"]
+        self._user: str = self.config["Credentials"]["User"]
+        self._password: str = self.config["Credentials"]["Password"]
+        self.database: str = self.config["database"]
+        self.host: str = self.config["ConnectionDetails"]["Host"]
+        self.port: str = self.config["ConnectionDetails"]["Port"]
         self.schema: str = self.config["schema"]
         self.DQTBL: object = {
                                 "PCORNET3": pandas.read_csv("./CDMs/DQTBL_pcornet_v3.csv"),
@@ -37,7 +39,7 @@ class Prep:
 
         if self.DBMS == "oracle":
             self.conn = self.Oracle()
-        elif self.DBMS == "postresql":
+        elif self.DBMS == "postgresql":
             self.conn = self.PostgreSQL()
         elif self.DBMS == "redshift":
             self.conn = self.Redshift()
@@ -49,43 +51,38 @@ class Prep:
             raise NameError("'%s' is not an accepted DBMS" % self.DBMS)
 
     def Oracle(self):
-        conn = oracle.connect(self.user + "/" + self.password + "@" + self.database)
+        conn = oracle.connect(self._user + "/" + self._password + "@" + self.database)
 
         #return Load(conn, self.DQTBL)
         return conn
 
     def PostgreSQL(self):
-        host: str = self.config["ConnectionDetails"]["Host"]
-        port: str = self.config["ConnectionDetails"]["Port"]
         conn = postgresql.connect(database=self.database,
-                                  user=self.user,
-                                  password=self.password,
-                                  host=host,
-                                  port=port)
+                                  user=self._user,
+                                  password=self._password,
+                                  host=self.host,
+                                  port=self.port)
 
         #return Load(conn, self.DQTBL)
         return conn
 
     def Redshift(self):
-        host: str = self.config["ConnectionDetails"]["Host"]
-        port: str = self.config["ConnectionDetails"]["Port"]
         conn = postgresql.connect(database=self.database,
-                                  user=self.user,
-                                  password=self.password,
-                                  host=host,
-                                  port=port)
+                                  user=self._user,
+                                  password=self._password,
+                                  host=self.host,
+                                  port=self.port)
 
         #return Load(conn, self.DQTBL)
         return conn
 
     def SQLServer(self):
         driver: str = self.config["ConnectionDetails"]["Driver"]
-        server: str = self.config["ConnectionDetails"]["Server"]
         conn = sqlserver.connect("DRIVER=" + driver +
-                                 ";SERVER=" + server +
+                                 ";SERVER=" + self.host +
                                  ";DATABASE=" + self.database +
-                                 ";UID=" + self.user +
-                                 ";PWD=" + self.password)
+                                 ";UID=" + self._user +
+                                 ";PWD=" + self._password)
 
         ##return Load(conn, self.DQTBL)
         return conn
