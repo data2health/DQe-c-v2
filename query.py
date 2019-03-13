@@ -5,7 +5,7 @@ Will hold all SQL queries and other modules will call specified methods from it.
 import pandas
 
 class Query:
-    def __init__(self, prep):
+    def __init__(self, prep: object):
         self.DBMS = prep.DBMS
         self.conn = prep.conn
         if prep.schema != "":
