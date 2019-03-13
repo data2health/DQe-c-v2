@@ -8,8 +8,6 @@ expected output -> DQTBL
 DQTBL is created from the CDM.csv files
 """
 
-#from .load import Load
-
 import json
 import CDMs, pandas
 import cx_Oracle as oracle
@@ -53,7 +51,6 @@ class Prep:
     def Oracle(self):
         conn = oracle.connect(self._user + "/" + self._password + "@" + self.database)
 
-        #return Load(conn, self.DQTBL)
         return conn
 
     def PostgreSQL(self):
@@ -63,7 +60,6 @@ class Prep:
                                   host=self.host,
                                   port=self.port)
 
-        #return Load(conn, self.DQTBL)
         return conn
 
     def Redshift(self):
@@ -73,7 +69,6 @@ class Prep:
                                   host=self.host,
                                   port=self.port)
 
-        #return Load(conn, self.DQTBL)
         return conn
 
     def SQLServer(self):
@@ -84,5 +79,13 @@ class Prep:
                                  ";UID=" + self._user +
                                  ";PWD=" + self._password)
 
-        ##return Load(conn, self.DQTBL)
         return conn
+
+# ===================================
+# self.tableList: object = pandas.DataFrame({ "TabNam":["EMPTY"],
+            #                                 "ColNam":["EMPTY"],
+            #                                 "NumRows": ["EMPTY"],
+            #                                 "Size":["EMPTY"],
+            #                                 "Loaded": ["EMPTY"]
+            #                               })
+# ===================================

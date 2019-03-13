@@ -40,7 +40,8 @@ for (j in 1: length(unique(DQTBL$TabNam)))
   ##extracted name of table j in CDM
   NAM_Repo <- as.character(tbls2[(tbls2$CDM_Tables == NAM),"Repo_Tables"])
   
-  if (!identical(NAM_Repo, character(0))) {
+###############* what's the point of checking this if condition? *###################
+  if (!identical(NAM_Repo, character(0))) { 
     # L <- as.numeric(tbls2[(tbls2$CDM_Tables == NAM),"NCols"])
     id.NAM <- which(DQTBL$TabNam == NAM)
   
