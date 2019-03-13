@@ -17,11 +17,13 @@ class Missingness:
                                           "MS2_FREQ": [""],
                                           "MSs_PERCENTAGE": [""]
                                         })
-        # once freqTab is populated, we can merge DQTBL with freqTab to proude missingness.csv 
+        # once freqTab is populated, we can merge DQTBL with freqTab to proude missingness.csv
         # self.missingnessDF = pandas.concat([DQTBL, freqTab], axis=1)
 
 
 # what do some of these variables mean? can we go through the sql queries?
+# apply cython- google it
+# null values, nonsense values
 
 for i in range(1, length(DQTBL.TabNam.unique())):
     NAM = DQTBL.TabNam.unique()[i]
