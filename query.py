@@ -7,9 +7,12 @@ import pandas
 class Query:
     def __init__(self, prep):
         self.DBMS = prep.DBMS
+        self.schema = prep.schema
+        self.database = prep.database
         self.conn = prep.conn
         if prep.schema != "":
             self.prefix = prep.database + "." + prep.schema + "."
+            self.query_prefix = f"'{prep.schema}.' ||"
         else:
             self.prefix = ""
 
@@ -32,63 +35,74 @@ class Query:
     
     def dbSize(self):
         if self.DBMS == "sql server":
-        """SELECT 
-            t.NAME AS Repo_Tables,
-            p.rows AS Rows,
-            SUM(a.total_pages) * 8 AS TotalSizeKB
-        FROM sys.tables t
-        INNER JOIN sys.indexes i ON t.OBJECT_ID = i.object_id
-        INNER JOIN sys.partitions p ON i.object_id = p.OBJECT_ID AND i.index_id = p.index_id
-        INNER JOIN sys.allocation_units a ON p.partition_id = a.container_id
-        LEFT OUTER JOIN sys.schemas s ON t.schema_id = s.schema_id
-        WHERE t.NAME NOT LIKE 'dt%' AND t.is_ms_shipped = 0 AND i.OBJECT_ID > 255 
-        GROUP BY 
-            t.Name,
-            p.Rows
-        ORDER BY t.Name
+            query = """SELECT 
+                        t.NAME AS TabNam,
+                        p.rows AS Rows,
+                        SUM(a.total_pages) * 8 AS TotalSizeKB
+                    FROM sys.tables t
+                    INNER JOIN sys.indexes i ON t.OBJECT_ID = i.object_id
+                    INNER JOIN sys.partitions p ON i.object_id = p.OBJECT_ID AND i.index_id = p.index_id
+                    INNER JOIN sys.allocation_units a ON p.partition_id = a.container_id
+                    LEFT OUTER JOIN sys.schemas s ON t.schema_id = s.schema_id
+                    WHERE t.NAME NOT LIKE 'dt%' AND t.is_ms_shipped = 0 AND i.OBJECT_ID > 255 
+                    GROUP BY 
+                        t.Name,
+                        p.Rows
+                    ORDER BY t.Name"""
 
 
--- Database: "Oracle"
-SELECT
-    Repo_Tables, TotalSizeKB,
-    NUM_ROWS
-FROM
-    (
-        (
-        SELECT
-            SEGMENT_NAME Repo_Tables,
-            bytes/1000 TotalSizeKB
-        FROM user_segments
-        WHERE segment_name IN
-            (
-                SELECT table_name
-                FROM all_tables
-            )
-        ) d
-        INNER JOIN
-        (
+        elif self.DBMS == "oracle":
+            query = """
             SELECT
-                TABLE_NAME,
-                NUM_ROWS
-            FROM all_tables
-        ) t
-        ON d.Repo_Tables =t.TABLE_NAME
-    )
+                TabNam,
+                TotalSizeKB,
+                NUM_ROWS AS Rows
+            FROM
+                (
+                    (
+                    SELECT
+                        SEGMENT_NAME TabNam,
+                        bytes/1000 TotalSizeKB
+                    FROM user_segments
+                    WHERE segment_name IN
+                        (
+                            SELECT table_name
+                            FROM all_tables
+                        )
+                    ) d
+                    INNER JOIN
+                    (
+                        SELECT
+                            TABLE_NAME,
+                            NUM_ROWS
+                        FROM all_tables
+                    ) t
+                    ON d.TabNam =t.TABLE_NAME
+                )"""
 
 
--- Database: "Redshift"
-SELECT
-    info.table AS Repo_Tables, 
-    info.tbl_rows AS Rows, 
-    info.size * 1000 AS TotalSizeKB
-FROM SVV_TABLE_INFO info
-WHERE info.schema='", schema_orig, "' ;
-  
-  
---   Database: "PostgreSQL"
-SELECT
-    tabs.table_name, 
-    pg.reltuples::BIGINT, 
-    pg_relation_size(tabs.table_name)/1000
-FROM pg_catalog.pg_class pg, information_schema.tables tabs
-WHERE tabs.table_name=pg.relname AND tabs.table_schema='public' ;"""
+        elif self.DBMS == "redshift":
+            query = f"""
+                SELECT
+                    info.table AS TabNam, 
+                    info.tbl_rows AS Rows, 
+                    info.size * 1000 AS TotalSizeKB
+                FROM SVV_TABLE_INFO info
+                WHERE info.schema='{self.schema}' ;"""
+                
+                
+        elif self.DBMS == "postgresql":
+            query = f"""
+                SELECT
+                    tabs.table_name as TabNam,
+                    pg.reltuples::BIGINT as Rows,
+                    pg_relation_size({self.query_prefix} tabs.table_name)/1000 as TotalSizeKB
+                FROM pg_catalog.pg_class pg, information_schema.tables tabs
+                WHERE 
+                    pg.oid = to_regclass({self.query_prefix} tabs.table_name) AND
+                    tabs.table_schema='{self.schema}' AND
+                    tabs.table_catalog='{self.database}';"""
+        output = pandas.read_sql(query, con=self.conn)
+        output.columns = ["TabNam", "Rows", "TotalSizeKB"]
+
+        return output
