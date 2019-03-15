@@ -81,12 +81,3 @@ class Prep:
                                  ";PWD=" + self._password)
 
         return conn
-
-# ===================================
-# self.tableList: object = pandas.DataFrame({ "TabNam":["EMPTY"],
-            #                                 "ColNam":["EMPTY"],
-            #                                 "NumRows": ["EMPTY"],
-            #                                 "Size":["EMPTY"],
-            #                                 "Loaded": ["EMPTY"]
-            #                               })
-# ===================================

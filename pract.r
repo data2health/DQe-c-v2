@@ -74,51 +74,51 @@ for (j in 1: length(unique(DQTBL$TabNam)))
 ###########################################
 # This scripts counts and stores frequency of missing values
 
-  for (j in 1: length(unique(DQTBL$TabNam))) 
-    ##DQTBL$TabNam has all table names
-  {
-    NAM <-  unique(DQTBL$TabNam)[j]
-    ##extracted name of table j in CDM
-    NAM_Repo <- as.character(tbls2[(tbls2$CDM_Tables == NAM),"Repo_Tables"])
-    # L <- as.numeric(tbls2[(tbls2$CDM_Tables == NAM),"NCols"])
-    id.NAM <- which(DQTBL$TabNam == NAM)
-    id.repotabs <- which(repotabs$TABLE_NAME == NAM_Repo)
-    ##extracting the row numbers
-    NAMTB <- DQTBL[id.NAM,]
-    REPOTB <- repotabs[id.repotabs,]
-    ##subsetting the DQTBL and repository table to only the rows from table j
-    ##saving the name of table j as characters
+  # for (j in 1: length(unique(DQTBL$TabNam))) 
+  #   ##DQTBL$TabNam has all table names
+  # {
+  #   NAM <-  unique(DQTBL$TabNam)[j]
+  #   ##extracted name of table j in CDM
+  #   NAM_Repo <- as.character(tbls2[(tbls2$CDM_Tables == NAM),"Repo_Tables"])
+  #   # L <- as.numeric(tbls2[(tbls2$CDM_Tables == NAM),"NCols"])
+  #   id.NAM <- which(DQTBL$TabNam == NAM)
+  #   id.repotabs <- which(repotabs$TABLE_NAME == NAM_Repo)
+  #   ##extracting the row numbers
+  #   NAMTB <- DQTBL[id.NAM,]
+  #   REPOTB <- repotabs[id.repotabs,]
+  #   ##subsetting the DQTBL and repository table to only the rows from table j
+  #   ##saving the name of table j as characters
     
-    for (i in 1:dim(REPOTB)[1])
-      ##now going through the columns of table j
-    {
-      col <- REPOTB$COLUMN_NAME[i]
-      SQLServer_Redshift_MS1_FRQ <- as.numeric(dbGetQuery(conn, paste0("SELECT COUNT('", col,"') FROM ",schema,NAM_Repo," WHERE [", col, "] IS NULL OR CAST(", col, " AS VARCHAR) IN ('')")))
-      ##calculated length (number of total rows) of each column from each table
-      DQTBL$SQLServer_Redshift_MS1_FRQ <- ifelse(DQTBL$ColNam == tolower(col) & DQTBL$TabNam == NAM, MS1_FRQ, DQTBL$MS1_FRQ )
-      ##stored frequency in the culumn FRQ
-      SQLServer_Redshift_MS2_FRQ <- as.numeric(dbGetQuery(conn, paste0("SELECT COUNT('", col,"') FROM ",schema,NAM_Repo," WHERE CAST(", col, " AS VARCHAR) IN ('+', '-', '_','#', '$', '*', '\', '?', '.', '&', '^', '%', '!', '@','NI')")))
-      ##calculated length (number of total rows) of each column from each table
-      DQTBL$SQLServer_Redshift_MS2_FRQ <- ifelse(DQTBL$ColNam == tolower(col) & DQTBL$TabNam == NAM, MS2_FRQ, DQTBL$MS2_FRQ )
-      ##stored frequency in the culumn FRQ
-      Oracle_MS1_FRQ <- as.numeric(dbGetQuery(conn, paste0("SELECT COUNT('", col,"') FROM ",schema,NAM_Repo," WHERE ", col, " IS NULL OR TO_CHAR(", col, ") IN ('')")))
-      ##calculated length (number of total rows) of each column from each table
-      DQTBL$Oracle_MS1_FRQ <- ifelse(DQTBL$ColNam == tolower(col) & DQTBL$TabNam == NAM, MS1_FRQ, DQTBL$MS1_FRQ )
-      ##stored frequency in the culumn FRQ
-      Oracle_MS2_FRQ <- as.numeric(dbGetQuery(conn, paste0("SELECT COUNT('", col,"') FROM ",schema,NAM_Repo," WHERE TO_CHAR(",col,") IN ('+', '-', '_','#', '$', '*', '\', '?', '.', '&', '^', '%', '!', '@','NI')")))
-      ##calculated length (number of total rows) of each column from each table
-      DQTBL$Oracle_MS2_FRQ <- ifelse(DQTBL$ColNam == tolower(col) & DQTBL$TabNam == NAM, MS2_FRQ, DQTBL$MS2_FRQ )
-      ##stored frequency in the culumn FRQ
-      PostgreSQL_MS1_FRQ <- as.numeric(dbGetQuery(conn, paste0("SELECT COUNT('", col,"') FROM ",schema,NAM_Repo," WHERE '", col, "' IS NULL OR CAST(", col, " AS VARCHAR) IN ('')")))
-      ##calculated length (number of total rows) of each column from each table
-      DQTBL$PostgreSQL_MS1_FRQ <- ifelse(DQTBL$ColNam == tolower(col) & DQTBL$TabNam == NAM, MS1_FRQ, DQTBL$MS1_FRQ )
-      ##stored frequency in the culumn FRQ
-      PostgreSQL_MS2_FRQ <- as.numeric(dbGetQuery(conn, paste0("SELECT COUNT('", col,"') FROM ",schema,NAM_Repo," WHERE CAST(", col, " AS VARCHAR) IN ('+', '-', '_','#', '$', '*', '\', '?', '.', '&', '^', '%', '!', '@','NI')")))
-      ##calculated length (number of total rows) of each column from each table
-      DQTBL$PostgreSQL_MS2_FRQ <- ifelse(DQTBL$ColNam == tolower(col) & DQTBL$TabNam == NAM, MS2_FRQ, DQTBL$MS2_FRQ )
-      ##stored frequency in the culumn FRQ
-    }
-  }
+  #   for (i in 1:dim(REPOTB)[1])
+  #     ##now going through the columns of table j
+  #   {
+  #     col <- REPOTB$COLUMN_NAME[i]
+  #     SQLServer_Redshift_MS1_FRQ <- as.numeric(dbGetQuery(conn, paste0("SELECT COUNT('", col,"') FROM ",schema,NAM_Repo," WHERE [", col, "] IS NULL OR CAST(", col, " AS VARCHAR) IN ('')")))
+  #     ##calculated length (number of total rows) of each column from each table
+  #     DQTBL$SQLServer_Redshift_MS1_FRQ <- ifelse(DQTBL$ColNam == tolower(col) & DQTBL$TabNam == NAM, MS1_FRQ, DQTBL$MS1_FRQ )
+  #     ##stored frequency in the culumn FRQ
+  #     SQLServer_Redshift_MS2_FRQ <- as.numeric(dbGetQuery(conn, paste0("SELECT COUNT('", col,"') FROM ",schema,NAM_Repo," WHERE CAST(", col, " AS VARCHAR) IN ('+', '-', '_','#', '$', '*', '\', '?', '.', '&', '^', '%', '!', '@','NI')")))
+  #     ##calculated length (number of total rows) of each column from each table
+  #     DQTBL$SQLServer_Redshift_MS2_FRQ <- ifelse(DQTBL$ColNam == tolower(col) & DQTBL$TabNam == NAM, MS2_FRQ, DQTBL$MS2_FRQ )
+  #     ##stored frequency in the culumn FRQ
+  #     Oracle_MS1_FRQ <- as.numeric(dbGetQuery(conn, paste0("SELECT COUNT('", col,"') FROM ",schema,NAM_Repo," WHERE ", col, " IS NULL OR TO_CHAR(", col, ") IN ('')")))
+  #     ##calculated length (number of total rows) of each column from each table
+  #     DQTBL$Oracle_MS1_FRQ <- ifelse(DQTBL$ColNam == tolower(col) & DQTBL$TabNam == NAM, MS1_FRQ, DQTBL$MS1_FRQ )
+  #     ##stored frequency in the culumn FRQ
+  #     Oracle_MS2_FRQ <- as.numeric(dbGetQuery(conn, paste0("SELECT COUNT('", col,"') FROM ",schema,NAM_Repo," WHERE TO_CHAR(",col,") IN ('+', '-', '_','#', '$', '*', '\', '?', '.', '&', '^', '%', '!', '@','NI')")))
+  #     ##calculated length (number of total rows) of each column from each table
+  #     DQTBL$Oracle_MS2_FRQ <- ifelse(DQTBL$ColNam == tolower(col) & DQTBL$TabNam == NAM, MS2_FRQ, DQTBL$MS2_FRQ )
+  #     ##stored frequency in the culumn FRQ
+  #     PostgreSQL_MS1_FRQ <- as.numeric(dbGetQuery(conn, paste0("SELECT COUNT('", col,"') FROM ",schema,NAM_Repo," WHERE '", col, "' IS NULL OR CAST(", col, " AS VARCHAR) IN ('')")))
+  #     ##calculated length (number of total rows) of each column from each table
+  #     DQTBL$PostgreSQL_MS1_FRQ <- ifelse(DQTBL$ColNam == tolower(col) & DQTBL$TabNam == NAM, MS1_FRQ, DQTBL$MS1_FRQ )
+  #     ##stored frequency in the culumn FRQ
+  #     PostgreSQL_MS2_FRQ <- as.numeric(dbGetQuery(conn, paste0("SELECT COUNT('", col,"') FROM ",schema,NAM_Repo," WHERE CAST(", col, " AS VARCHAR) IN ('+', '-', '_','#', '$', '*', '\', '?', '.', '&', '^', '%', '!', '@','NI')")))
+  #     ##calculated length (number of total rows) of each column from each table
+  #     DQTBL$PostgreSQL_MS2_FRQ <- ifelse(DQTBL$ColNam == tolower(col) & DQTBL$TabNam == NAM, MS2_FRQ, DQTBL$MS2_FRQ )
+  #     ##stored frequency in the culumn FRQ
+  #   }
+  # }
       
 
 DQTBL$FRQ <- as.numeric(DQTBL$FRQ)
