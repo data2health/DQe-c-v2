@@ -19,9 +19,10 @@ class Query:
         else:
             self.prefix = ""
 
+    ## Calculates missingness for each row (i.e. each table) and adds to DQTBL which is later printed in missingness.csv
     def missingnessCalc(self, row):
         nonsense = "'+', '-', '_','#', '$', '*', '\', '?', '.', '&', '^', '%', '!', '@','NI'"
-
+    
         freqQuery = f"""
                 SELECT COUNT(*)
                 FROM {self.schema}{row.TabNam} ;"""

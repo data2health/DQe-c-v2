@@ -45,7 +45,8 @@ class Orphan:
 
     
     def orphanCalc(self):
-        q = Query(self.prep)
+        # q = Query(self.prep)
+        q = self.query
         refPrime = self.getRefPrime()
 
         #refPrime["CountOut"] = refPrime.apply(lambda row: q.Orphan(row["TabNam_primary"], row["TabNam_reference"], row["ColNam"])["count"], axis=1)

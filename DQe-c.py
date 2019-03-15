@@ -1,4 +1,5 @@
 from orphan import Orphan
+from missingness import Missingness
 from prep import Prep
 from query import Query
 from diff import Diff
@@ -14,6 +15,8 @@ def main():
 
     #orph = Orphan(details)
     #orph.orphanCalc()
+
+    #Missingness(DQTBL, query).getMissingness()
 
     return False
 
