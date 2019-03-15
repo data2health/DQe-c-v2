@@ -16,7 +16,7 @@ def main():
     #orph = Orphan(details)
     #orph.orphanCalc()
 
-    #Missingness(DQTBL, query).getMissingness()
+    # Missingness(DQTBL, query).get()
 
     return False
 
