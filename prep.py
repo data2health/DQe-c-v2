@@ -21,6 +21,7 @@ class Prep:
 
         self.CDM: str = self.config["CDM"].upper()
         self.DBMS: str = self.config["DBMS"].lower()
+        self.organization: str = self.config["Organization"]
         self._user: str = self.config["Credentials"]["User"]
         self._password: str = self.config["Credentials"]["Password"]
         self.database: str = self.config["database"]
@@ -80,12 +81,3 @@ class Prep:
                                  ";PWD=" + self._password)
 
         return conn
-
-# ===================================
-# self.tableList: object = pandas.DataFrame({ "TabNam":["EMPTY"],
-            #                                 "ColNam":["EMPTY"],
-            #                                 "NumRows": ["EMPTY"],
-            #                                 "Size":["EMPTY"],
-            #                                 "Loaded": ["EMPTY"]
-            #                               })
-# ===================================
