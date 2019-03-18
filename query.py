@@ -20,8 +20,8 @@ class Query:
             self.prefix = ""
 
     ## Calculates missingness for each row (i.e. each table) and adds to DQTBL which is later printed in missingness.csv
-    def missingnessCalc(self, row):
-        nonsense = "'+', '-', '_','#', '$', '*', '\', '?', '.', '&', '^', '%', '!', '@','NI'"
+    def missingnessCalc(self, row, func):
+        # nonsense = "'+', '-', '_','#', '$', '*', '\', '?', '.', '&', '^', '%', '!', '@','NI'"
     
         freqQuery = f"""
                 SELECT COUNT(*)
@@ -30,39 +30,41 @@ class Query:
         uniqFreqQuery = f"""
                         SELECT COUNT(DISTINCT {row.ColNam})
                         FROM {self.schema}{row.TabNam} ;"""
-        
-        if (self.DBMS == "sql server" or self.DBMS == "redshift"):
-            ms1FreqQuery = f"""
-                        SELECT COUNT('{row.ColNam}')
-                        FROM {self.schema}{row.TabNam}
-                        WHERE [{row.ColNam}] IS NULL OR CAST({row.ColNam} AS VARCHAR) IN ("") ;"""
 
-            ms2FreqQuery = f"""
-                        SELECT COUNT('{row.ColNam}')
-                        FROM {self.schema}{row.TabNam}
-                        WHERE CAST({row.ColNam} AS VARCHAR) IN ({nonsense}) ;"""
-            
-        elif self.DBMS == "oracle":
-            ms1FreqQuery = f"""
-                        SELECT COUNT('{row.ColNam}')
-                        FROM {self.schema}{row.TabNam}
-                        WHERE {row.ColNam} IS NULL OR TO_CHAR({row.ColNam}) IN ("") ;"""
+        ms1FreqQuery, ms2FreqQuery = func(row)
 
-            ms2FreqQuery = f"""
-                        SELECT COUNT('{row.ColNam}')
-                        FROM {self.schema}{row.TabNam}
-                        WHERE TO_CHAR({row.ColNam}) IN ({nonsense}) ;"""
+        # if (self.DBMS == "sql server" or self.DBMS == "redshift"):
+        #     ms1FreqQuery = f"""
+        #                 SELECT COUNT('{row.ColNam}')
+        #                 FROM {self.schema}{row.TabNam}
+        #                 WHERE [{row.ColNam}] IS NULL OR CAST({row.ColNam} AS VARCHAR) IN ("") ;"""
 
-        elif self.DBMS == "postgresql":
-            ms1FreqQuery = f"""
-                        SELECT COUNT('{row.ColNam}')
-                        FROM {self.schema}{row.TabNam} 
-                        WHERE '{row.ColNam}' IS NULL OR CAST({row.ColNam} AS VARCHAR) IN ("") ;"""
+        #     ms2FreqQuery = f"""
+        #                 SELECT COUNT('{row.ColNam}')
+        #                 FROM {self.schema}{row.TabNam}
+        #                 WHERE CAST({row.ColNam} AS VARCHAR) IN ({nonsense}) ;"""
+
+        # elif self.DBMS == "oracle":
+        #     ms1FreqQuery = f"""
+        #                 SELECT COUNT('{row.ColNam}')
+        #                 FROM {self.schema}{row.TabNam}
+        #                 WHERE {row.ColNam} IS NULL OR TO_CHAR({row.ColNam}) IN ("") ;"""
+
+        #     ms2FreqQuery = f"""
+        #                 SELECT COUNT('{row.ColNam}')
+        #                 FROM {self.schema}{row.TabNam}
+        #                 WHERE TO_CHAR({row.ColNam}) IN ({nonsense}) ;"""
+
+        # elif self.DBMS == "postgresql":
+        #     ms1FreqQuery = f"""
+        #                 SELECT COUNT('{row.ColNam}')
+        #                 FROM {self.schema}{row.TabNam} 
+        #                 WHERE '{row.ColNam}' IS NULL OR CAST({row.ColNam} AS VARCHAR) IN ("") ;"""
                         
-            ms2FreqQuery = f"""
-                        SELECT COUNT('{row.ColNam}')
-                        FROM {self.schema}{row.TabNam}
-                        WHERE CAST({row.ColNam} AS VARCHAR) IN ({nonsense}) ;"""
+        #     ms2FreqQuery = f"""
+        #                 SELECT COUNT('{row.ColNam}')
+        #                 FROM {self.schema}{row.TabNam}
+        #                 WHERE CAST({row.ColNam} AS VARCHAR) IN ({nonsense}) ;"""
         
         row["TEST_DATE"] = datetime.datetime.today().strftime('%m-%d-%Y')
         row["FREQ"] = pandas.read_sql(freqQuery, con=self.conn).values[0][0]
