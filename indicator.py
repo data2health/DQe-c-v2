@@ -1,108 +1,46 @@
-"""
-expected input: not sure
-expected output: indicators.csv
-"""
 from prep import Prep
-import pandas, datetime
+import pandas
 
 class Indicator:
-    def __init__(self, DQTBL: object, query: object):
-        self.DQTBL = DQTBL
+    def __init__(self, query: object):
         self.query = query
-        self.organization = Prep().organization
-        self.CDM = Prep().CDM
-        self.conn = Prep().conn
 
-    ## returns missingness.csv after calculating missingness for each table 
     def get(self):
-        # indicators = self.DQTBL.apply(self.query.missingnessCalc, axis=1)
-        pass
-        # return indicators.to_csv("reports/indicators.csv")
+        if Prep().CDM == "PCORNET3" or Prep().CDM == "PCORNET31":
+            withoutGenderPCORI      = self.query.withoutdemPCORI(col = "sex", group = "Gender")
+            withoutRacePCORI        = self.query.withoutdemPCORI(col = "race", group = "Race")
+            withoutEthnicityPCORI   = self.query.withoutdemPCORI(col = "hispanic", group = "Ethnicity")
 
-    def queryInd(self):
-        indicator = pandas.DataFrame()
+            withoutMedicationPCORI  = self.query.withoutPCORI(table = "PRESCRIBING", col = "prescribingid", group = "Medication")
+            withoutDiagnosisPCORI   = self.query.withoutPCORI(table = "DIAGNOSIS", col = "dx", group = "Diagnosis")
+            withoutEncounterPCORI   = self.query.withoutPCORI(table = "ENCOUNTER", col = "enc_type", group = "Encounter")
+            withoutWeightPCORI      = self.query.withoutPCORI(table = "VITAL", col = "wt", group = "Weight")
+            withoutHeightPCORI      = self.query.withoutPCORI(table = "VITAL", col = "ht", group = "Height")
+            withoutBpSysPCORI       = self.query.withoutPCORI(table = "VITAL", col = "systolic", group = "BP")
+            withoutBpDiasPCORI      = self.query.withoutPCORI(table = "VITAL", col = "diastolic", group = "BP")
+            withoutSmokingPCORI     = self.query.withoutPCORI(table = "VITAL", col = "smoking", group = "Smoking")
 
-        indicator["GROUP"] = pandas.read_sql("SQL query", con=self.conn).values[0][0]
-        indicator["MISSING PERCENTAGE"] = pandas.read_sql("SQL query", con=self.conn).values[0][0]
-        indicator["MISSING POPULATION"] = pandas.read_sql("SQL query", con=self.conn).values[0][0]
-        indicator["DENOMINATOR"] = pandas.read_sql("SQL query", con=self.conn).values[0][0]
-        indicator["PERCENTAGE"] = []
-        indicator["TEST_DATE"] = datetime.datetime.today().strftime('%m-%d-%Y')
-        indicator["ORGANIZATION"] = self.organization
-        indicator["CDM"] = self.CDM
+            indicators = pandas.concat([withoutGenderPCORI, withoutRacePCORI, withoutEthnicityPCORI, withoutMedicationPCORI,
+                                    withoutDiagnosisPCORI, withoutEncounterPCORI, withoutWeightPCORI, withoutHeightPCORI,
+                                    withoutBpSysPCORI, withoutBpDiasPCORI, withoutSmokingPCORI], ignore_index=True)
 
-        return indicator
+        elif Prep().CDM == "OMOPV5_0" or Prep().CDM == "OMOPV5_2" or Prep().CDM == "OMOPV5_3":
+            withoutGenderOMOP       = self.query.withoutdemOMOP(col = "gender_concept_id", group = "Gender")
+            withoutRaceOMOP         = self.query.withoutdemOMOP(col = "race_concept_id", group = "Race")
+            withoutEthnicityOMOP    = self.query.withoutdemOMOP(col = "ethnicity_concept_id", group = "Ethnicity")
 
+            withoutBpOMOP           = self.query.isPresentOMOP(table = "MEASUREMENT", col = "measurement_concept_id", group = "BP")
+            withoutHrOMOP           = self.query.isPresentOMOP(table = "MEASUREMENT", col = "measurement_concept_id", group = "HR")
+            withoutHeightOMOP       = self.query.isPresentOMOP(table = "MEASUREMENT", col = "measurement_concept_id", group = "Height")
+            withoutWeightOMOP       = self.query.isPresentOMOP(table = "MEASUREMENT", col = "measurement_concept_id", group = "Weight")
+            withoutSmokingOMOP      = self.query.isPresentOMOP(table = "OBSERVATION", col = "observation_concept_id", group = "Smoker")
 
-#++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++#
+            withoutMedicationOMOP   = self.query.withoutOMOP(table = "DRUG_EXPOSURE", col = "drug_exposure_id", group = "Medication")
+            withoutDiagnosisOMOP    = self.query.withoutOMOP(table = "CONDITION_OCCURRENCE", col = "condition_occurrence_id", group = "Condition")
+            withoutVisitOMOP        = self.query.withoutOMOP(table = "VISIT_OCCURRENCE", col = "visit_occurrence_id", group = "Visit")
 
-# a function to count patients without a given parameter within the source patient table
+            indicators = pandas.concat([withoutGenderOMOP, withoutRaceOMOP, withoutEthnicityOMOP, withoutBpOMOP, withoutHrOMOP,
+                                    withoutHeightOMOP, withoutWeightOMOP, withoutSmokingOMOP, withoutMedicationOMOP,
+                                    withoutDiagnosisOMOP, withoutVisitOMOP], ignore_index=True)
 
-# if (DBMS == "sql server") {  
-def withoutdem(self, table,col,list,ref_date1 = "1900-01-01", ref_date2=datetime.datetime.today()):
-    denominator = pandas.read_sql("SELECT COUNT(DISTINCT(PATID)) FROM DEMOGRAPHIC WHERE BIRTH_DATE > '",ref_date1,"' AND BIRTH_DATE  < '",
-                                     ref_date2,"'", con=self.conn)
-    notin = pandas.read_sql("SELECT COUNT(PATID) FROM (SELECT * FROM ",schema,prefix,"DEMOGRAPHIC WHERE BIRTH_DATE > '",ref_date1,"' AND BIRTH_DATE  < '",
-                               ref_date2,"') dd WHERE ",
-                               col, " NOT IN ('",paste(list,collapse = "','"),"')", con=self.conn)
-    whattheyhave = pandas.read_sql("SELECT DISTINCT(",col,") FROM (SELECT * FROM ",schema,prefix,"DEMOGRAPHIC WHERE BIRTH_DATE > '",ref_date1,"' AND BIRTH_DATE  < '",
-                                      ref_date2,"') dd WHERE ",
-                                      col, " NOT IN ('",paste(list,collapse = "','"),"')", con=self.conn)
-    d1 = round((notin/denominator)*100,4)
-    print(d1, f"""% of patients born between ",{ref_date1}," and ",{ref_date2}, " are missing ", {list.name}," information.""")
-    if (d1 > 0): print(f"""{notin} of the {denominator} patients born between {ref_date1} and {ref_date2} don't have an acceptable {list.name} record in the {df.name} table.""")
-    if (d1 > 0): print(f"""Unacceptable values in column {col} are {whattheyhave}.""")
-    output = pandas.DataFrame({ "group" : [list],
-                                "missing percentage" : [d1],
-                                "missing population" : [notin],
-                                "denominator" : [denominator] })
-    return output
-  
-def without(table,col,list,ref_date1 = "1900-01-01", ref_date2=datetime.datetime.today()):
-    denominator = pandas.read_sql("SELECT COUNT(DISTINCT(PATID)) FROM ",schema,prefix,"DEMOGRAPHIC WHERE BIRTH_DATE > '",ref_date1,"' AND BIRTH_DATE  < '",ref_date2,"'", con=self.conn)
-    pats_wit_oneout = pandas.read_sql("SELECT COUNT(DISTINCT(PATID)) FROM ",schema,subset(tbls2$Repo_Tables,tbls2$CDM_Tables == tolower(table))," WHERE ",toupper(col), " IS NULL OR CAST(",toupper(col), " AS CHAR(54)) IN  ('",paste(list,collapse = "','"),"')", con=self.conn)
-    ppwo = round((pats_wit_oneout/denominator)*100,4)
-    if (ppwo > 1): print(pats_wit_oneout, " of the patients -- ",ppwo,"% of patients -- are missing at least 1 acceptable ",toupper(col)," value in the ",toupper(table)," table.",appendLF=T)
-    whatsoever = pandas.read_sql("SELECT COUNT(DISTINCT(PATID)) FROM ",schema,prefix,"DEMOGRAPHIC WHERE BIRTH_DATE > '",ref_date1,"' AND BIRTH_DATE  < '",ref_date2,"'"," AND PATID IN (SELECT DISTINCT(PATID) FROM ",schema,subset(tbls2$Repo_Tables,tbls2$CDM_Tables == tolower(table))," WHERE ",toupper(col), " IS NOT NULL AND CAST(",toupper(col), " AS CHAR(54)) NOT IN  ('",paste(list,collapse = "','"),"'))", con=self.conn)
-    pwse = round(((denominator-whatsoever)/denominator)*100,4)
-    if (pwse > 1): print(whatsoever, " of the patients -- ",pwse,"% of patients -- are missing any acceptable ",toupper(col)," value in the ",toupper(table)," table.",appendLF=T)
-    print(pwse, "% of unique patients don't have any '", list.name,"' record in the ",df.name, " table.",appendLF=T)
-    output <- pandas.DataFrame({ "group" : [list],
-                                 "missing percentage" : [pwse],
-                                 "missing population" : [whatsoever],
-                                 "denominator" : [denominator] })
-    return output
-
-# if (SQL == "Oracle") {
-def withoutdem(table,col,list,ref_date1 = "1900-01-01", ref_date2=datetime.datetime.today()):
-    denominator <- dbGetQuery(conn,
-                                paste0("SELECT COUNT(DISTINCT(PATID)) FROM DEMOGRAPHIC WHERE BIRTH_DATE > TO_DATE('",ref_date1,"', 'yyyy-mm-dd') AND BIRTH_DATE  < TO_DATE('",ref_date2,"', 'yyyy-mm-dd')"))
-    notin <- dbGetQuery(conn,
-                          paste0("SELECT COUNT(PATID) FROM (SELECT * FROM ",schema,prefix,"DEMOGRAPHIC WHERE BIRTH_DATE > TO_DATE('",ref_date1,"', 'yyyy-mm-dd') AND BIRTH_DATE  < TO_DATE('",ref_date2,"', 'yyyy-mm-dd')) WHERE ",
-                                 toupper(col), " NOT IN ('",paste(list,collapse = "','"),"')"))
-    whattheyhave <- dbGetQuery(conn,
-                                 paste0("SELECT DISTINCT(",toupper(col),") FROM (SELECT * FROM ",schema,prefix,"DEMOGRAPHIC WHERE BIRTH_DATE > TO_DATE('",ref_date1,"', 'yyyy-mm-dd') AND BIRTH_DATE  < TO_DATE('",ref_date2,"', 'yyyy-mm-dd')) WHERE ",
-                                        toupper(col), " NOT IN ('",paste(list,collapse = "','"),"')"))
-    d1 <- round((notin/denominator)*100,4)
-    message(d1, "% of patients born between ",ref_date1," and ",ref_date2, " are missing ", list.name," information.",appendLF=T)
-    if (d1 > 0) message(notin, " of the ",denominator, " patients born between ",ref_date1," and ",ref_date2, " don't have an acceptable ", toupper(list.name), " record in the ",toupper(df.name), " table.",appendLF=T)
-    if (d1 > 0) message("Unacceptable values in column ", toupper(col), " are ",whattheyhave,".",appendLF=T)
-    output <- data.frame("group"=list.name, "missing percentage" = as.numeric(d1), "missing population"= as.numeric(notin), "denominator"= as.numeric(denominator))
-    return(output)
-
-def without(table,col,list,ref_date1 = "1900-01-01", ref_date2=datetime.datetime.today()):
-    denominator <- dbGetQuery(conn,
-                            paste0("SELECT COUNT(DISTINCT(PATID)) FROM ",schema,prefix,"DEMOGRAPHIC WHERE BIRTH_DATE > TO_DATE('",ref_date1,"', 'yyyy-mm-dd') AND BIRTH_DATE  < TO_DATE('",ref_date2,"', 'yyyy-mm-dd')"))
-    pats_wit_oneout <- dbGetQuery(conn,
-                                paste0("SELECT COUNT(DISTINCT(PATID)) FROM ",schema,subset(tbls2$Repo_Tables,tbls2$CDM_Tables == tolower(table))," WHERE ",toupper(col), " IS NULL OR TO_CHAR(",toupper(col),") IN  ('",paste(list,collapse = "','"),"')")
-    )
-    ppwo <- round((pats_wit_oneout/denominator)*100,4)
-    if (ppwo > 1) message(pats_wit_oneout, " of the patients -- ",ppwo,"% of patients -- are missing at least 1 acceptable ",toupper(col)," value in the ",toupper(table)," table.",appendLF=T)
-    whatsoever <- dbGetQuery(conn,
-                            paste0("SELECT COUNT(DISTINCT(PATID)) FROM ",schema,prefix,"DEMOGRAPHIC WHERE BIRTH_DATE > TO_DATE('",ref_date1,"', 'yyyy-mm-dd') AND BIRTH_DATE  < TO_DATE('",ref_date2,"', 'yyyy-mm-dd') AND PATID IN (SELECT DISTINCT(PATID) FROM ",schema,subset(tbls2$Repo_Tables,tbls2$CDM_Tables == tolower(table))," WHERE ",toupper(col), " IS NOT NULL AND TO_CHAR(",toupper(col),") NOT IN  ('",paste(list,collapse = "','"),"'))")
-    )
-    pwse <- round(((denominator-whatsoever)/denominator)*100,4)
-    if (pwse > 1) message(whatsoever, " of the patients -- ",pwse,"% of patients -- are missing any acceptable ",toupper(col)," value in the ",toupper(table)," table.",appendLF=T)
-    message(pwse, "% of unique patients don't have any '", list.name,"' record in the ",df.name, " table.",appendLF=T)
-    output <- data.frame("group"=list.name, "missing percentage" = as.numeric(pwse), "missing population"=as.numeric(whatsoever),"denominator"=as.numeric(denominator))
-    return(output)
+        return indicators.to_csv("reports/indicators.csv")
