@@ -1,5 +1,7 @@
 from orphan import Orphan
 from missingness import Missingness
+from indicator import Indicator
+from prep import Prep
 from query import Query
 from diff import Diff
 import pandas as pd
@@ -21,6 +23,11 @@ def main():
     orph = Orphan(DQTBL, query)
     DQTBL = orph.orphanCalc()
 
+    #orph = Orphan(details)
+    #orph.orphanCalc()
+
+    # Missingness(DQTBL, query).get()
+    # Indicator(query).get()
 
     DQTBL.to_csv("reports/DQTBL_report.csv")
     return False

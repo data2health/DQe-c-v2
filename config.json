@@ -9,8 +9,8 @@
     "schema": "yakima",
 
     "Credentials": {
-        "User": "trberg",
-        "Password": "boyisthissomepassword!"
+        "User": "user",
+        "Password": "password!"
     },
 
     "ConnectionDetails": {
@@ -22,5 +22,5 @@
 
     "Organization": "DataQuest",
     
-    "Name": "Tim Bergquist"
+    "Name": "Some Name"
 }
