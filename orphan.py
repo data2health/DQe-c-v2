@@ -15,14 +15,13 @@ import json
 from query import Query
 
 class Orphan:
-    def __init__(self, prep: object, query: object):
+    def __init__(self, DQTBL: object, query: object):
         # ==================================
         # Initiates the orphan class
         # creates the DQTBL object
         # ==================================
 
-        self.DQTBL = prep.DQTBL
-        self.prep = prep
+        self.DQTBL = DQTBL
         self.query = query
 
 
@@ -37,7 +36,7 @@ class Orphan:
         
 
         ## merge primary and reference tables and remove all non-reference keys
-        referencePrimaryMerge: object = primaryPairs.merge(referencePairs, on="ColNam", how="right", suffixes=("_primary", "_reference"))
+        referencePrimaryMerge: object = primaryPairs.merge(referencePairs, on="ColNam", how="right", suffixes=("_primary", "_external"))
         referencePrimaryMerge.dropna(subset = ["TabNam_primary"], inplace=True)
 
         
@@ -45,10 +44,27 @@ class Orphan:
 
     
     def orphanCalc(self):
-        # q = Query(self.prep)
+        
+        # import the query object from self
         q = self.query
-        refPrime = self.getRefPrime()
 
-        #refPrime["CountOut"] = refPrime.apply(lambda row: q.Orphan(row["TabNam_primary"], row["TabNam_reference"], row["ColNam"])["count"], axis=1)
+        # gather the all foreign key references
+        refPrime = self.getRefPrime()[["TabNam_primary", "ColNam", "TabNam_external"]]
 
-        print (refPrime)
+        # calcute the number of foreign keys that are not present in their reference table
+        refPrime["CountOut"] = refPrime.apply(lambda x: q.Orphan(x), axis=1)
+        
+        # combine results with the main DQTBL object
+        append_merge = self.DQTBL.merge(refPrime, left_on=["TabNam", "ColNam"], right_on=["TabNam_external", "ColNam"], how="left")
+        append_merge.rename(index=str, columns={"TabNam_primary": "reference"}, inplace=True)
+        
+        # calculate the number of foreign keys that are present in their reference table
+        append_merge["CountIn"] = append_merge.apply(lambda x: x["UNIQUE_FREQ"]-x["CountOut"], axis=1)
+
+        # reorganize dataframe and remove redundant columns
+        output_DQTBL = append_merge[['TabNam', 'ColNam', 'primary', 'DQLVL', 'abbr', 'cat',
+                                    'Rows', 'TotalSizeKB', 'loaded', 'UNIQUE_FREQ', 'CountIn', 
+                                    'CountOut', 'reference', 'MS1_FREQ', 'MS2_FREQ', 
+                                    'MSs_PERCENTAGE', 'ORGANIZATION', 'CDM', 'TEST_DATE']]
+
+        return output_DQTBL

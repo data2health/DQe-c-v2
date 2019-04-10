@@ -1,23 +1,28 @@
 from orphan import Orphan
 from missingness import Missingness
-from prep import Prep
 from query import Query
 from diff import Diff
+import pandas as pd
 
 def main():
 
-    details = Prep()
-    query = Query(details)
+    query = Query()
 
     ## outputs the DQTBL object and generates the reports/tablelist.csv file
-    DQTBL = Diff(details, query).getDQTBL()
+    diff = Diff(query)
+    DQTBL = diff.getDQTBL()
+    #DQTBL = pd.read_csv("tables/DQTBL.csv")
+
+    miss = Missingness(DQTBL, query)
+    DQTBL = miss.getMissingness()
+    #DQTBL = pd.read_csv("reports/missingness.csv")
+    
+    # run the orphan key calculations
+    orph = Orphan(DQTBL, query)
+    DQTBL = orph.orphanCalc()
 
 
-    #orph = Orphan(details)
-    #orph.orphanCalc()
-
-    #Missingness(DQTBL, query).getMissingness()
-
+    DQTBL.to_csv("reports/DQTBL_report.csv")
     return False
 
 

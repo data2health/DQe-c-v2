@@ -15,4 +15,6 @@ class Missingness:
     def getMissingness(self):
         missingness = self.DQTBL.apply(self.query.missingnessCalc, axis=1)
         
-        return missingness.to_csv("reports/missingness.csv")
+        #missingness.to_csv("reports/missingness.csv")
+
+        return missingness
