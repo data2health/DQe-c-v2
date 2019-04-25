@@ -31,7 +31,7 @@ class Indicator:
             
             indicators_output = []
 
-            indicator_tests = json.load(open("indicators.json"))
+            indicator_tests = json.load(open("tests/indicators.json"))
 
             for test in indicator_tests:
                 try:
