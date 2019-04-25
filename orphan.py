@@ -15,14 +15,14 @@ import json
 from query import Query
 
 class Orphan:
-    def __init__(self, DQTBL: object, query: object):
+    def __init__(self, query: object):
         # ==================================
         # Initiates the orphan class
         # creates the DQTBL object
         # ==================================
 
-        self.DQTBL = DQTBL
         self.query = query
+        self.DQTBL = query.DQTBL
 
 
     def getRefPrime(self):
@@ -44,15 +44,12 @@ class Orphan:
 
     
     def orphanCalc(self):
-        
-        # import the query object from self
-        q = self.query
 
         # gather the all foreign key references
         refPrime = self.getRefPrime()[["TabNam_primary", "ColNam", "TabNam_external"]]
 
         # calcute the number of foreign keys that are not present in their reference table
-        refPrime["CountOut"] = refPrime.apply(lambda x: q.Orphan(x), axis=1)
+        refPrime["CountOut"] = refPrime.apply(lambda x: self.orphan(x), axis=1)
         
         # combine results with the main DQTBL object
         append_merge = self.DQTBL.merge(refPrime, left_on=["TabNam", "ColNam"], right_on=["TabNam_external", "ColNam"], how="left")
@@ -67,4 +64,24 @@ class Orphan:
                                     'CountOut', 'reference', 'MS1_FREQ', 'MS2_FREQ', 
                                     'MSs_PERCENTAGE', 'ORGANIZATION', 'CDM', 'TEST_DATE']]
 
-        return output_DQTBL
+        self.query.DQTBL = output_DQTBL
+
+
+    def orphan(self, row):
+        primary  =  row["TabNam_primary"]
+        external =  row["TabNam_external"]
+        col      =  row["ColNam"]
+        query = f"""
+            SELECT COUNT(DISTINCT({col}))
+            FROM {self.query.prefix}{external} as ext
+            WHERE NOT EXISTS 
+            (
+                SELECT {col}
+                FROM {self.query.prefix}{primary} as prim
+                WHERE prim.{col} = ext.{col}
+            );"""
+
+        CountOutResults = int(pandas.read_sql(query, con=self.query.conn)["count"])
+
+        return CountOutResults
+    

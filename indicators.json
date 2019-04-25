@@ -1,0 +1,90 @@
+[
+    {
+        "indicator name": "blood pressure",
+        "table": "MEASUREMENT", 
+        "col": "measurement_concept_id", 
+        "label": "BP",
+        "concepts": [45876174,4326744]
+    },
+    {
+        "indicator name": "heart rate",
+        "table": "MEASUREMENT", 
+        "col": "measurement_concept_id", 
+        "label": "HR",
+        "concepts": [4239408]
+    },
+    {
+        "indicator name": "height",
+        "table": "MEASUREMENT", 
+        "col": "measurement_concept_id", 
+        "label": "Height",
+        "concepts": [4177340,4087492,4154781,4275188,44804668]
+    },
+    {
+        "indicator name": "weight",
+        "table": "MEASUREMENT", 
+        "col": "measurement_concept_id", 
+        "label": "Weight",
+        "concepts": [4181041,4184608,45876171,4103471,44804668,4030015]
+    },
+    {
+        "indicator name": "smoking status",
+        "table": "OBSERVATION", 
+        "col": "measurement_concept_id", 
+        "label": "Smoker",
+        "concepts": [4310250, 40299112, 40329177, 40298672, 40329167, 42536346, 46270534,
+                            4144272, 45879404, 42872410, 40298657, 45883537, 45884038, 4298794,
+                            40427925, 40299110, 45878118, 42709996, 45884037, 43530634, 4141786]
+    },
+    {
+        "indicator name": "gender",
+        "table": "person",
+        "col": "gender_concept_id",
+        "label": "Gender",
+        "concepts": [8507, 8532]
+    },
+    {
+        "indicator name": "ethnicity",
+        "table": "person",
+        "col": "ethnicity_concept_id",
+        "label": "Ethnicity",
+        "concepts": [38003563,38003564]
+    },
+    {
+        "indicator name": "race",
+        "table": "person",
+        "col": "race_concept_id",
+        "label": "Race",
+        "concepts": [38003572,38003573,38003574,38003575,38003576,
+            38003577,38003578,38003579,38003580,38003581,
+            38003582,38003583,38003584,38003585,38003586,
+            38003587,38003588,38003589,38003590,38003591,
+            38003592,38003593,38003594,38003595,38003596,
+            38003597,38003598,38003599,38003600,38003601,
+            38003602,38003603,38003604,38003605,38003606,
+            38003607,38003608,38003609,38003610,38003611,
+            38003612,38003613,38003614,38003615,38003616,
+            8515,8516,8527,8557,8657]
+    },
+    {
+        "indicator name": "Medications",
+        "table": "drug_exposure",
+        "col": "drug_exposure_id",
+        "label": "Medication",
+        "concepts": false
+    },
+    {
+        "indicator name": "Conditions",
+        "table": "condition_occurrence",
+        "col": "condition_occurrence_id",
+        "label": "Condition",
+        "concepts": false
+    },
+    {
+        "indicator name": "Visit",
+        "table": "visit_occurrence",
+        "col": "visit_occurrence_id",
+        "label": "Vist",
+        "concepts": false
+    }
+]

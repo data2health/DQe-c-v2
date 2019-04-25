@@ -1,37 +1,50 @@
 from orphan import Orphan
 from missingness import Missingness
 from indicator import Indicator
-from prep import Prep
 from query import Query
 from diff import Diff
 import pandas as pd
+import argparse
 
-def main():
+def main(config):
 
-    query = Query()
+
+
+    query = Query(config)
 
     ## outputs the DQTBL object and generates the reports/tablelist.csv file
-    diff = Diff(query)
-    DQTBL = diff.getDQTBL()
-    #DQTBL = pd.read_csv("tables/DQTBL.csv")
+    Diff(query).createDifference()
 
-    miss = Missingness(DQTBL, query)
-    DQTBL = miss.getMissingness()
-    #DQTBL = pd.read_csv("reports/missingness.csv")
-    
+
+    ## Adds the missingness statistics to the query.DQTBL  object
+    Missingness(query).missing()
+
+
     # run the orphan key calculations
-    orph = Orphan(DQTBL, query)
-    DQTBL = orph.orphanCalc()
+    Orphan(query).orphanCalc()
 
-    #orph = Orphan(details)
-    #orph.orphanCalc()
 
-    # Missingness(DQTBL, query).get()
-    # Indicator(query).get()
+    # run the Indicator tests
+    # new tests can be added to the Indicators.json file
+    Indicator(query).get()
 
-    DQTBL.to_csv("reports/DQTBL_report.csv")
+    
     return False
 
 
 if __name__ == "__main__":
-    main()
+
+    description = """
+    DQe-c is a data quality testing tool for clinical data repositories.\n
+    Currently supported Common Data Models include OMOPv5 and PCORI3.\n
+    For more info, see https://github.com/data2health/DQe-c-v2
+    """
+
+    parser = argparse.ArgumentParser(description=description)
+    parser.add_argument('-c', '--configpath', type=str, default="config.json", help='The path to the configuration file. (default: config.json)')
+    
+    args = parser.parse_args()
+    
+    config_file = args.configpath
+    
+    main(config_file)

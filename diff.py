@@ -6,20 +6,20 @@ output: tablelist.csv
 """
 
 import math
+import pandas
 
 class Diff:
     def __init__(self, query: object):
         self.query = query
-        self.DQTBL = query.DQTBL
 
     
-    def getDQTBL(self):
+    def createDifference(self):
 
-        ## gather all tables present and their sizes and row number
-        DB_TBLs = self.query.dbSize()
+        ## gather all tables currently present and their sizes and row number
+        DB_TBLs = self.dbSize()
 
         # merge the expected tables (DQTBL) and the actual tables (DB_TBLs)
-        DQTBL = self.DQTBL.merge(DB_TBLs, on=["TabNam", "ColNam"], how="left")
+        DQTBL = self.query.DQTBL.merge(DB_TBLs, on=["TabNam", "ColNam"], how="left")
 
         # mark all expected tables as either present or absent in the actual database
         DQTBL["loaded"] = DQTBL["Rows"].apply(lambda x: not math.isnan(x))
@@ -31,13 +31,91 @@ class Diff:
         # absence of tables and rows.
 
         tablelist = DQTBL[["TabNam", "ColNam", "Rows", "TotalSizeKB", "loaded"]].drop_duplicates()
-        tablelist.to_csv("reports/tablelist.csv")
+        self.query.outputReport(tablelist, "tablelist.csv")
+        #tablelist.to_csv("reports/tablelist.csv")
 
         ## ======================================================================================
 
         # remove all table and col references that are not loaded in the actual database
         # this is mainly so we don't try and query non-existant tables down the road
-        DQTBL = DQTBL[DQTBL["loaded"]]
-        return DQTBL
+        # write the DQTBL object to query to track our progress
+        
+        self.query.DQTBL = DQTBL[DQTBL["loaded"]]
+
+
+    def dbSize(self):
+        if self.query.DBMS == "sql server":
+            query = """
+                SELECT 
+                        t.NAME AS TabNam,
+                        p.rows AS Rows,
+                        SUM(a.total_pages) * 8 AS TotalSizeKB
+                FROM sys.tables t
+                INNER JOIN sys.indexes i ON t.OBJECT_ID = i.object_id
+                INNER JOIN sys.partitions p ON i.object_id = p.OBJECT_ID AND i.index_id = p.index_id
+                INNER JOIN sys.allocation_units a ON p.partition_id = a.container_id
+                LEFT OUTER JOIN sys.schemas s ON t.schema_id = s.schema_id
+                WHERE t.NAME NOT LIKE 'dt%' AND t.is_ms_shipped = 0 AND i.OBJECT_ID > 255 
+                GROUP BY 
+                    t.Name,
+                    p.Rows
+                ORDER BY t.Name"""
+
+
+        elif self.query.DBMS == "oracle":
+            query = """
+                SELECT
+                    TabNam,
+                    TotalSizeKB,
+                    NUM_ROWS AS Rows
+                FROM
+                    ((
+                        SELECT
+                            SEGMENT_NAME TabNam,
+                            bytes/1000 TotalSizeKB
+                        FROM user_segments
+                        WHERE segment_name IN
+                            (SELECT table_name
+                                FROM all_tables)) d
+                        INNER JOIN
+                        (SELECT
+                                TABLE_NAME,
+                                NUM_ROWS
+                            FROM all_tables) t
+                        ON d.TabNam =t.TABLE_NAME
+                    )"""
+
+
+        elif self.query.DBMS == "redshift":
+            query = f"""
+                SELECT
+                    info.table AS TabNam, 
+                    info.tbl_rows AS Rows, 
+                    info.size * 1000 AS TotalSizeKB
+                FROM SVV_TABLE_INFO info
+                WHERE info.schema='{self.query.schema}' ;"""
+                
+                
+        elif self.query.DBMS == "postgresql":
+            query = f"""
+                SELECT
+                    tabs.table_name as TabNam,
+                    cols.column_name as colnam,
+                    pg.reltuples::BIGINT as Rows,
+                    pg_relation_size({self.query.query_prefix} tabs.table_name)/1000 as TotalSizeKB
+                FROM pg_catalog.pg_class pg, information_schema.tables tabs, information_schema.columns cols
+                WHERE 
+                    pg.oid = to_regclass({self.query.query_prefix} tabs.table_name) AND
+                    tabs.table_schema='{self.query.schema}' AND
+                    tabs.table_catalog='{self.query.database}' AND
+                    cols.table_schema='{self.query.schema}' AND
+                    cols.table_catalog='{self.query.database}' AND
+                    cols.table_name = tabs.table_name
+                    ;"""
+
+        output = pandas.read_sql(query, con=self.query.conn)
+        output.columns = ["TabNam", "ColNam", "Rows", "TotalSizeKB"]
+
+        return output
         
         
