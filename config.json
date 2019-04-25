@@ -1,0 +1,26 @@
+{   
+
+    "DBMS": "",
+
+    "database": "",
+
+    "CDM": "",
+
+    "schema": "",
+    "vocabulary schema": "",
+
+    "Credentials": {
+        "User": "",
+        "Password": ""
+    },
+
+    "ConnectionDetails": {
+        "Host": "",
+        "Port": "",
+        "Driver": ""
+    },
+
+    "Organization": "",
+    
+    "Name": ""
+}
