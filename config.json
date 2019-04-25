@@ -1,26 +1,26 @@
 {   
 
-    "DBMS": "postgresql",
+    "DBMS": "",
 
-    "database": "dq_prod",
+    "database": "",
 
-    "CDM": "OMOPV5_0",
+    "CDM": "",
 
-    "schema": "yakima",
+    "schema": "",
+    "vocabulary schema": "",
 
     "Credentials": {
-        "User": "user",
-        "Password": "password!"
+        "User": "",
+        "Password": ""
     },
 
     "ConnectionDetails": {
-        "Host": "localhost",
-        "Port": "8080",
-        "Server": "server",
-        "Driver": "driver"
+        "Host": "",
+        "Port": "",
+        "Driver": ""
     },
 
-    "Organization": "DataQuest",
+    "Organization": "",
     
-    "Name": "Some Name"
+    "Name": ""
 }

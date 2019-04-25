@@ -1,3 +1,4 @@
 .DS_Store
 reports/*
 __pycache__
+config_*.json

@@ -28,6 +28,7 @@ class Prep:
         self.host: str = self.config["ConnectionDetails"]["Host"]
         self.port: str = self.config["ConnectionDetails"]["Port"]
         self.schema: str = self.config["schema"]
+        self.vocab_schema: str = self.config["vocabulary schema"]
         self.DQTBL: object = {
                                 "PCORNET3": pandas.read_csv("./CDMs/DQTBL_pcornet_v3.csv"),
                                 "PCORNET31": pandas.read_csv("./CDMs/DQTBL_pcornet_v31.csv"),
