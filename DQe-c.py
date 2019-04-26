@@ -1,8 +1,8 @@
-from orphan import Orphan
-from missingness import Missingness
-from indicator import Indicator
-from query import Query
-from diff import Diff
+from modules.orphan import Orphan
+from modules.missingness import Missingness
+from modules.indicator import Indicator
+from modules.query import Query
+from modules.diff import Diff
 import pandas as pd
 import argparse
 
@@ -12,23 +12,32 @@ def main(config):
 
     query = Query(config)
 
-    ## outputs the DQTBL object and generates the reports/tablelist.csv file
+    ## Generates the reports/tablelist.csv file
+    ## Filters the query.DQTBL object to include only tables that
+    ## are present in the live database.
     Diff(query).createDifference()
+    print ("Differences has been run")
 
 
-    ## Adds the missingness statistics to the query.DQTBL  object
+    ## Adds the missingness statistics to the query.DQTBL object
     Missingness(query).missing()
+    print ("Missingness tests have been run")
 
 
     # run the orphan key calculations
+    # adds the orphan calculations to the query.DQTBL object
     Orphan(query).orphanCalc()
+    print ("Orphan Key test has been run")
 
 
     # run the Indicator tests
     # new tests can be added to the Indicators.json file
     Indicator(query).get()
+    print ("Indicators test has been run")
 
-    
+
+    query.outputReport(query.DQTBL, "DQe-c_report.csv")
+
     return False
 
 
