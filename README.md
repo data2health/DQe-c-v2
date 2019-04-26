@@ -127,3 +127,5 @@ In order to add a new test, add a new curly bracket section to the list and incl
 3. <strong>col:</strong> This is the column in the above table that will checked for the presence of the concepts.
 4. <strong>label:</strong> How the results of the test will be labeled in the final visualization.
 5. <strong>concepts:</strong> This is a list of the possible concept_ids or values of the clinical concept that will be looked for in the column above. If this field is labeled "false", the indicator test will just check for NULLs and nonsense values, counting the presence of a string or integer as a positive finding in the respective patient. 
+
+Adding a new block will automatically incorporate those variables as a test. The results of the test will be added to the file report and visualized in the dashboard.
