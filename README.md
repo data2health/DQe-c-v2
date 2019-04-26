@@ -29,25 +29,28 @@ All of the required configution variables are set in config.json or a derivative
 Each of the variables in the configuration file need to be filled in.
 ```
 "DBMS": "Database Management System",
-Currently supported and tested options:
-    "postgresql"
-    "sql server"
-Currently supported but untested options:
-    "oracle"
-    "redshift"
+```
+* Currently supported and tested options:
+    * "postgresql"
+    * "sql server"
+* Currently supported but untested options:
+    * "oracle"
+    * "redshift"
 
 "database": "name of the database",
-
+```
 "CDM": "Common Data Model",
-Current supported options:
-    "OMOPV5_0"  # OMOP CDM version 5.0
-    "OMOPV5_2"  # OMOP CDM version 5.2
-    "OMOPV5_3"  # OMOP CDM version 5.3
-    "PCORI3"    # PCORI version 3
-    "PCORI31"   # PCORI version 3.1
+```
+* Current supported options:
+    * "OMOPV5_0"  # OMOP CDM version 5.0
+    * "OMOPV5_2"  # OMOP CDM version 5.2
+    * "OMOPV5_3"  # OMOP CDM version 5.3
+    * "PCORI3"    # PCORI version 3
+    * "PCORI31"   # PCORI version 3.1
+```
+"schema": "schema of your clinical tables",
 
-"schema": "what schema are your clinical tables stored under?",
-"vocabulary schema": "what schema is your vocabulary stored under (if separate)?",
+"vocabulary schema": "schema of your vocabulary tables?",
 
 "Credentials": {
     "User": "username",
@@ -57,8 +60,7 @@ Current supported options:
 "ConnectionDetails": {
     "Host": "ex. localhost",
     "Port": "ex. 8080",
-    "Driver": "{ODBC Driver 13 for SQL Server}"
-                This is only necessary for SQL Server
+    "Driver": "{ODBC Driver 13 for SQL Server}"  # This is only necessary for SQL Server
 },
 
 "Organization": "Name of your organization",
