@@ -1,10 +1,6 @@
 # DQe-c
 <img src="images/DQe-c_logo_more_drip.png" width="120px" align="left" hspace="10" vspace="6"/> 
-**DQe-c** is a data quality assessment tool for clinical data repositories. The main focus of DQe-c is evaluation of data completeness and visualization of the test results.
-
-
-# Description
-This version of DQe-c was built using Python from the first version of [DQe-c](https://github.com/data2health/DQe-c) (which was in R). The goal was to make each of the tests in DQe-c modular and to make customization and test additions easier to build.
+DQe-c is a data quality assessment tool for clinical data repositories. The main focus of DQe-c is evaluation of data completeness and visualization of the test results. This version of DQe-c was built using Python and is based on the first version of [DQe-c](https://github.com/data2health/DQe-c) (which was in R). The goal was to make each of the tests in DQe-c modular and to make customization and test additions easier to build and integrate.
 
 # Installation
 DQe-c system requirements
