@@ -4,3 +4,4 @@ configs/config_*
 DQe_viz.twb
 *.pyc
 modules/*.pyc
+reports/*
