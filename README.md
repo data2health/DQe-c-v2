@@ -1,6 +1,6 @@
 # DQe-c
-<img src="images/DQe-c_logo_more_drip.png" width="120px" align="left" hspace="10" vspace="6"/> 
-DQe-c is a data quality assessment tool for clinical data repositories. The main focus of DQe-c is evaluation of data completeness and visualization of the test results. This version of DQe-c was built using Python and is based on the first version of [DQe-c](https://github.com/data2health/DQe-c) (which was in R). The goal was to make each of the tests in DQe-c modular and to make customization and test additions easier to build and integrate.
+<img src="images/DQe-c_logo_more_drip.svg" width="120px" align="left" hspace="10" vspace="6"/> 
+<strong>DQe-c</strong> is a data quality assessment tool for clinical data repositories. The main focus of DQe-c is evaluation of data completeness and visualization of the test results. This version of DQe-c was built using Python and is based on the first version of <a href="https://github.com/data2health/DQe-c">DQe-c</a>. The goal was to make each of the tests in DQe-c modular and to make customization additions easier to build and integrate.
 
 # Installation
 DQe-c system requirements
@@ -98,3 +98,32 @@ Checks for orphan keys, or foreign keys that are not present in the primary tabl
 
 ### Indicators.py
 Calculates the percentage of patients that don't have key clinical indicators in their records. This includes measurements like Blood Pressure, Heart Rate, or White Blood Cell count. We also include overall record completeness checks, like what percent of patients don't have a visit, a medication, or an observation associated with their record. The output of this test is written to indicators.csv. Check the wiki to see how to add new clinical indicator checks.
+
+#### Adding Clinical Indicator Tests
+The main goal of the Indicators test is to assess the completeness or availability of different clinical metrics (Blood pressure, medications, smoking status, etc.) The final output of this test is a list of clinical variables and their relative missingness in patients. This is reported as, percentage of patients missing the queried concepts. The test is carried out in the Indicator.py file, but the variables for each test are in the Indicators.json file.
+
+The format of the Indicators.json is as such
+```
+[
+    {
+        "indicator name": "blood pressure",
+        "table": "MEASUREMENT", 
+        "col": "measurement_concept_id", 
+        "label": "BP",
+        "concepts": [45876174,4326744]
+    },
+    {
+        "indicator name": "Conditions",
+        "table": "condition_occurrence",
+        "col": "condition_occurrence_id",
+        "label": "Condition",
+        "concepts": false
+    }
+]
+```
+In order to add a new test, add a new curly bracket section to the list and include the five variables
+1. <strong>indicator name:</strong> The indicator name is only for human readability but should describe the clinical variable.
+2. <strong>table:</strong> This is the name of the table in the CDM that will be queried for the clinical variable.
+3. <strong>col:</strong> This is the column in the above table that will checked for the presence of the concepts.
+4. <strong>label:</strong> How the results of the test will be labeled in the final visualization.
+5. <strong>concepts:</strong> This is a list of the possible concept_ids or values of the clinical concept that will be looked for in the column above. If this field is labeled "false", the indicator test will just check for NULLs and nonsense values, counting the presence of a string or integer as a positive finding in the respective patient. 
