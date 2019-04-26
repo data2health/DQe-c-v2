@@ -1,5 +1,4 @@
 .DS_Store
-reports/*
 __pycache__
 configs/config_*
 DQe_viz.twb
