@@ -1,0 +1,54 @@
+# FOR NOW:
+READ IN DQTBL.CSV AND CREATE PRIMARY=TRUE TABLE AND PRIMARY=FALSE TABLE.
+POINT AT EACH OTHER AND SEE WHICH ONES ARE MATCHED.
+USE ORPHAN AS AN EXAMPLE- USE THE ORPHAN CODE.
+EVENTUALLY DQTBL.CSV WILL BE REPLACED WITH CDM TABLES.
+```{r, echo=FALSE, include=FALSE}
+require(data.table);require(dplyr);require(ggplot2);require(gridExtra);require(rmarkdown);require(knitr):require(plotly);require(DT);require(treemap); require(visNetwork)
+CDM = 'OMOPV5_2'
+ORGANIZATION = 'UW'
+```
+
+```{r}
+library("reticulate")
+use_python("/usr/local/bin/python3", required = T)
+```
+
+```{r, echo=FALSE, fig.align='center', fig.width= 10}
+dato <- read.csv("/Users/mehadi/work/d2health/DQe-c-v2/tables/DQTBL.csv")
+dato$TotalSizeKB <- ifelse(is.null(dato$TotalSizeKB) | is.na(dato$TotalSizeKB), 0, dato$TotalSizeKB)
+dato$TotalSizeGB <- round(as.numeric(dato$TotalSizeKB)/1000000,4)
+dato$Rows <- ifelse(is.null(dato$Rows) | is.na(dato$Rows), 0, dato$Rows)
+dato$status <- ifelse((dato$loaded == "True" & dato$DQLVL == "No"), "Table not available", "Table available")
+datatable(select(dato, TabNam, status, TotalSizeGB, Rows), options = list(pageLength = 5), filter = 'bottom')
+```
+
+```{python}
+import pandas as pd
+DQTBL: object = pd.read_csv("tables/DQTBL.csv")
+
+primaryPairs: object = DQTBL[(DQTBL["primary"]) & (DQTBL["cat"].isin(["clinical", "health_system"]))][["ColNam", "TabNam"]]
+referencePairs: object = DQTBL[(DQTBL["primary"] == False) & (DQTBL["cat"].isin(["clinical", "health_system"]))][["ColNam", "TabNam"]]
+    
+referencePrimaryMerge: object = primaryPairs.merge(referencePairs, on="ColNam", how="right", suffixes=("_primary", "_reference"))
+referencePrimaryMerge.dropna(subset = ["TabNam_primary"], inplace=True)
+
+
+```
+
+```{r, echo=FALSE, fig.align='center', fig.width= 10}
+dat.net <- py$referencePrimaryMerge
+if (CDM %in% c("OMOPV5_2")) {
+     nodes <- data.frame(id = dat.net$X, 
+                     label = dat.net$CDM_Tables, 
+                     group = c(dat.net$status),
+                     shadow = F)
+ edges <- py$referencePrimaryMerge
+ visNetwork(nodes, edges) %>%
+ visGroups(groupname = "Table loaded but empty", color = "#EE9572", shape = "circle") %>%
+   visGroups(groupname = "Table available", color = "#00C5CD", shape = "circle") %>%
+   visGroups(groupname = "Table not loaded!", color = "gray", shape = "circle") %>%
+   visOptions(highlightNearest = TRUE, nodesIdSelection = T) %>% 
+   visEdges(arrows = 'from', scaling = list(min = .5, max = 1)) %>%
+   visInteraction(navigationButtons = T, dragView = FALSE, zoomView = FALSE)
+}
