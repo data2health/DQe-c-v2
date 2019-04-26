@@ -1,8 +1,10 @@
-# DQe-c-v2
-Re-engineering the DQe-c Data Quality package
+# DQe-c
+<img src="images/DQe-c_logo_more_drip.png" width="120px" align="left" hspace="10" vspace="6"/> 
+**DQe-c** is a data quality assessment tool for clinical data repositories. The main focus of DQe-c is evaluation of data completeness and visualization of the test results.
+
 
 # Description
-We are re-building the original DQe-c from scratch in python to make it more scalable and adaptable.
+This version of DQe-c was built using Python from the first version of [DQe-c](https://github.com/data2health/DQe-c) (which was in R). The goal was to make each of the tests in DQe-c modular and to make customization and test additions easier to build.
 
 # Installation
 DQe-c system requirements
@@ -17,7 +19,7 @@ cd DQe-c-v2
 ```
 Install the dependency libraries
 ```
-pip install -r requirements.txt
+pip install -r requirements_pip.txt
 ```
 OR
 ```
