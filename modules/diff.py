@@ -30,13 +30,13 @@ class Diff:
         # output the full report of the tablelist. This will be used to visualize the presence or
         # absence of tables and rows.
 
-        tablelist = DQTBL[["TabNam", "ColNam", "Rows", "TotalSizeKB", "loaded"]].drop_duplicates()
+        tablelist = DQTBL[["TabNam", "ColNam", "Rows", "TotalSizeKB", "loaded", "primary"]].drop_duplicates()
         self.query.outputReport(tablelist, "tablelist.csv")
         #tablelist.to_csv("reports/tablelist.csv")
 
         ## ======================================================================================
 
-        # remove all table and col references that are not loaded in the actual database
+        # removes all table and col references that are not loaded in the actual database
         # this is mainly so we don't try and query non-existant tables down the road
         # write the DQTBL object to query to track our progress
         
@@ -45,9 +45,10 @@ class Diff:
 
     def dbSize(self):
         if self.query.DBMS == "sql server":
-            query = """
+            query = f"""
                 SELECT 
                         t.NAME AS TabNam,
+                        cols.COLUMN_NAME AS ColNam,
                         p.rows AS Rows,
                         SUM(a.total_pages) * 8 AS TotalSizeKB
                 FROM sys.tables t
@@ -55,10 +56,15 @@ class Diff:
                 INNER JOIN sys.partitions p ON i.object_id = p.OBJECT_ID AND i.index_id = p.index_id
                 INNER JOIN sys.allocation_units a ON p.partition_id = a.container_id
                 LEFT OUTER JOIN sys.schemas s ON t.schema_id = s.schema_id
-                WHERE t.NAME NOT LIKE 'dt%' AND t.is_ms_shipped = 0 AND i.OBJECT_ID > 255 
+                LEFT JOIN information_schema.columns cols ON t.NAME = cols.TABLE_NAME
+                WHERE
+                    t.NAME NOT LIKE 'dt%' AND t.is_ms_shipped = 0 AND i.OBJECT_ID > 255 AND
+                    s.NAME = '{self.query.schema}' AND
+                    cols.TABLE_SCHEMA = '{self.query.schema}'
                 GROUP BY 
                     t.Name,
-                    p.Rows
+                    p.Rows,
+                    cols.COLUMN_NAME
                 ORDER BY t.Name"""
 
 
@@ -89,11 +95,14 @@ class Diff:
         elif self.query.DBMS == "redshift":
             query = f"""
                 SELECT
-                    info.table AS TabNam, 
+                    info.table AS TabNam,
+                    cols.column_name AS ColNam,
                     info.tbl_rows AS Rows, 
                     info.size * 1000 AS TotalSizeKB
-                FROM SVV_TABLE_INFO info
-                WHERE info.schema='{self.query.schema}' ;"""
+                FROM SVV_TABLE_INFO info, information_schema.columns cols
+                WHERE 
+                    info.schema='{self.query.schema}' AND
+                    cols.table_name = info.table; """
                 
                 
         elif self.query.DBMS == "postgresql":

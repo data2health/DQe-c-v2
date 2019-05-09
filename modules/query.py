@@ -1,6 +1,11 @@
 import json
 import pandas
-import cx_Oracle as oracle
+
+try:
+    import cx_Oracle as oracle
+except ModuleNotFoundError:
+    import cx_oracle as oracle
+
 import psycopg2 as postgresql
 import pyodbc as sqlserver
 import datetime
@@ -108,7 +113,7 @@ class Query:
         if not (os.path.exists(reportFolder)):
             os.makedirs(reportFolder)
         
-        report_df.to_csv(f"{reportFolder}/{report_filename}")
+        report_df.to_csv(f"{reportFolder}/{report_filename}", index=False)
 
     
  

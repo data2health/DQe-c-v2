@@ -13,9 +13,9 @@ Install the git repository
 git clone https://github.com/data2health/DQe-c-v2.git
 cd DQe-c-v2
 ```
-Install the dependency libraries
+Install the dependency libraries (conda is recommended, pip has issues installing cx_oracle)
 ```
-pip install -r requirements_pip.txt
+pip install -r requirements.txt
 ```
 OR
 ```

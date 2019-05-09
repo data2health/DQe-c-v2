@@ -46,7 +46,7 @@ class Indicator:
 
             indicators = pandas.concat(indicators_output, ignore_index=True)
 
-        self.query.outputReport(indicators, "indicators_report.csv")
+        self.query.outputReport(indicators, "indicators.csv")
 
 
     def withoutdemPCORI(self, col: str, group: str) -> object:
