@@ -89,8 +89,8 @@ class Indicator:
         
         return pandas.DataFrame({
                                 "GROUP": [group],
-                                "MISSING PERCENTAGE": [d1],
-                                "MISSING POPULATION": [notin],
+                                "MISSING_PERCENTAGE": [d1],
+                                "MISSING_POPULATION": [notin],
                                 "DENOMINATOR": [denominator],
                                 "PERCENTAGE": [str(round(d1,2))+"%"],
                                 "TEST_DATE": [datetime.datetime.today().strftime('%m-%d-%Y')],
@@ -147,8 +147,8 @@ class Indicator:
 
         return pandas.DataFrame({
                                 "GROUP": [group],
-                                "MISSING PERCENTAGE": [pwse],
-                                "MISSING POPULATION": [denominator-pats_with_one],
+                                "MISSING_PERCENTAGE": [pwse],
+                                "MISSING_POPULATION": [denominator-pats_with_one],
                                 "DENOMINATOR": [denominator],
                                 "PERCENTAGE": [str(round(pwse,2))+"%"],
                                 "TEST_DATE": [datetime.datetime.today().strftime('%m-%d-%Y')],
@@ -171,8 +171,8 @@ class Indicator:
     def missing_variable(self, group, concept = "", ):
         return pandas.DataFrame({
             "GROUP": [group if concept == "" else concept],
-            "MISSING PERCENTAGE": [100],
-            "MISSING POPULATION": [0],
+            "MISSING_PERCENTAGE": [100],
+            "MISSING_POPULATION": [0],
             "DENOMINATOR": [0],
             "PERCENTAGE": [str(round(0.00,2))+"%"],
             "TEST_DATE": [datetime.datetime.today().strftime('%m-%d-%Y')],
