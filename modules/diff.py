@@ -36,7 +36,7 @@ class Diff:
 
         ## ======================================================================================
 
-        # remove all table and col references that are not loaded in the actual database
+        # removes all table and col references that are not loaded in the actual database
         # this is mainly so we don't try and query non-existant tables down the road
         # write the DQTBL object to query to track our progress
         

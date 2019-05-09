@@ -1,5 +1,6 @@
 .DS_Store
 __pycache__
+modules/__pycache__
 configs/config_*
 DQe_viz.twb
 *.pyc

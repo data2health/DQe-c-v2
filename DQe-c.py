@@ -26,7 +26,7 @@ def main(config):
 
     # run the orphan key calculations
     # adds the orphan calculations to the query.DQTBL object
-    Orphan(query).orphanCalc()
+    Orphan(query).orphan()
     print ("Orphan Key test has been run")
 
 
@@ -34,9 +34,6 @@ def main(config):
     # new tests can be added to the Indicators.json file
     Indicator(query).get()
     print ("Indicators test has been run")
-
-
-    query.outputReport(query.DQTBL, "DQe-c_report.csv")
 
     return False
 

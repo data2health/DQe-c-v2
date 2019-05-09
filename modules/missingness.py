@@ -19,7 +19,8 @@ class Missingness:
         elif self.query.DBMS == "postgresql":
             missingness = self.query.DQTBL.apply(lambda row: self.missingnessCalc(row, self.postgresqlQuery), axis=1)
 
-        self.query.DQTBL = missingness
+        #self.query.DQTBL = missingness
+        self.query.outputReport(missingness, "missingness.csv")
 
 
     def sqlserverRedshiftQuery(self, row):
