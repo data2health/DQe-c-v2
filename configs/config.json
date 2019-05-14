@@ -4,7 +4,7 @@
 
     "database": "",
 
-    "CDM": "",
+    "CDM": "OMOPV5_2",
 
     "schema": "",
     "vocabulary schema": "",
@@ -20,7 +20,7 @@
         "Driver": ""
     },
 
-    "Organization": "",
+    "Organization": "UW",
     
     "Name": ""
 }
