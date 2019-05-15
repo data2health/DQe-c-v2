@@ -1,17 +1,27 @@
-```{r, echo=FALSE, include=FALSE}
-require(data.table);require(dplyr);require(ggplot2);require(gridExtra);require(rmarkdown);require(knitr):require(plotly);require(DT);require(treemap); require(visNetwork)
-```
+---
+title: "DQe-c Report"
+output: 
+  html_document: 
+    highlight: tango
+params:
+  config: "config.json"
+  outputDir: "report"
+---
 
 ```{r, echo=FALSE}
 library("reticulate")
-use_python("/usr/local/bin/python3", required = T)
+use_python("/anaconda/bin", required = T)
+config = params$config
+outputDir = params$outputDir
 ```
 
 ```{python, echo=FALSE}
 import json
 
-with open("/Users/mehadi/work/d2health/DQe-c-v2/configs/config.json") as json_file:
-    config = json.load(json_file)
+config = r.config
+outputDir = r.outputDir
+
+config = json.load(open(config))
 
 CDM = config["CDM"].upper()
 
@@ -29,16 +39,17 @@ ORGANIZATION = py$organization
 ```
 
 
-##Load and Test Details
+## Load and Test Details
 
 This DQec report is generated from testing completeness in `r CDM` data from `r ORGANIZATION` on `r Sys.Date()`. 
 
 ### Table 1. List and Status of Common Data Model (CDM) -- here, `r CDM` -- Tables in this load
-The table bolow provides a list of CDM tables provided (and not provided) in the data load.
+The table below provides a list of CDM tables provided (and not provided) in the data load.
 
-The source data this table and the following graphics in this section are being generated from is `r paste("tablelist_",CDM,"_",ORGANIZATION,"_",as.character(format(Sys.Date(),"%d-%m-%Y")),".csv", sep="")`
+The source data this table and the following graphics in this section are being generated from is reports/`r ORGANIZATION`/`r Sys.Date()`/tablelist.csv
+
 ```{r, echo=FALSE, fig.align='center', fig.width= 10}
-dato <- read.csv("/Users/mehadi/work/d2health/DQe-c-v2/mhTest/realTables/tablelist.csv")
+dato <- read.csv(paste(py$outputDir, "tablelist.csv", sep=""))
 dato$TotalSizeKB <- ifelse(is.null(dato$TotalSizeKB) | is.na(dato$TotalSizeKB), 0, dato$TotalSizeKB)
 dato$TotalSizeGB <- round(as.numeric(dato$TotalSizeKB)/1000000,4)
 dato$Rows <- ifelse(is.null(dato$Rows) | is.na(dato$Rows), 0, dato$Rows)
@@ -52,6 +63,7 @@ datatable(select(sub_dato, TabNam, status, TotalSizeGB, Rows), options = list(pa
 
 ### Figure 1. Available Tables, Compared to all CDM (`r CDM`) Tables
 This figure shows which of the CDM tables are loaded and/or available. 
+
 ```{r, echo=FALSE, fig.align='center', fig.width= 10}
 treemap(sub_dato,
         index=c("TabNam"),
@@ -83,7 +95,7 @@ treemap(sub_dato,
 import pandas as pd
 from typing import List
 
-DQTBL: object = pd.read_csv("/Users/mehadi/work/d2health/DQe-c-v2/mhTest/realTables/DQe-c_report.csv")
+DQTBL: object = pd.read_csv(r.outputDir + "tablelist.csv")
 
 primaryPairs: object = DQTBL[DQTBL["primary"] == True][["ColNam", "TabNam"]]
 referencePairs: object = DQTBL[DQTBL["primary"] == False][["ColNam", "TabNam"]]
@@ -117,25 +129,24 @@ label = list(id_dict.keys())
 
 ### Figure 3. Loaded tables against CDM (`r CDM`) Relational Model.
 The figure below shows a network visualization of the CDM data model, as well as highlighting the tables that are available in this load (legend is the same as in Figure 1).
+
 ```{r, echo=FALSE, fig.align='center', fig.width= 10}
 dat.net <- py$referencePrimaryMerge
-if (CDM %in% c("PCORNET3","PCORNET31","OMOPV5_0","OMOPV5_2","OMOPV5_3")) {
-  nodes <- data.frame(id = py$id, 
-                    label = py$label,
-                    group = py$stat,
-                    #shadow = c(FALSE)
-                    shadow = F) # if OMOP, shadow = F 
-  edges <- data.frame(from = py$from_ind, to = py$to_ind)
-  visNetwork(nodes, edges) %>%
-  
-  visGroups(groupname = "Table not available", color = "#00C5CD", shape = "circle") %>%
-  visGroups(groupname = "Table available", color = "#EE9572", shape = "circle") %>%
 
-  visOptions(highlightNearest = TRUE, nodesIdSelection = T) %>% 
-  visEdges(arrows = 'from', scaling = list(min = .5, max = 1)) %>%
-  visInteraction(navigationButtons = T, dragView = FALSE, zoomView = FALSE)
+nodes <- data.frame(id = py$id, 
+                  label = py$label,
+                  group = py$stat,
+                  #shadow = c(FALSE)
+                  shadow = F) # if OMOP, shadow = F 
+edges <- data.frame(from = py$from_ind, to = py$to_ind)
+visNetwork(nodes, edges) %>%
 
-}
+visGroups(groupname = "Table not available", color = "#00C5CD", shape = "circle") %>%
+visGroups(groupname = "Table available", color = "#EE9572", shape = "circle") %>%
+
+visOptions(highlightNearest = TRUE, nodesIdSelection = T) %>% 
+visEdges(arrows = 'from', scaling = list(min = .5, max = 1)) %>%
+visInteraction(navigationButtons = T, dragView = FALSE, zoomView = FALSE)
 
 ```
 
@@ -156,17 +167,32 @@ Data for this table is generated from `r paste("DQ_Master_Table_",CDM,"_",ORGANI
 
 ```{r, echo=FALSE}
 #DQTBL <- dato
-DQTBL <- read.csv("/Users/mehadi/work/d2health/DQe-c-v2/mhTest/realTables/DQe-c_report.csv")
+DQTBL <- read.csv(paste(py$outputDir, "missingness.csv", sep=""))
 datatable(DQTBL[,c("TabNam","ColNam","DQLVL", "Rows", "UNIQUE_FREQ","MS1_FREQ","MS2_FREQ","MSs_PERCENTAGE", "TEST_DATE")], options = list(pageLength = 10), filter = 'bottom')
 ```
 
 ### Figure 4. Changes in Primary Keys Across Loads
 Figure below profiles changes in primary keys across loads as a measure of change in patient/record number over time.
 
+```{python, echo=FALSE, warning=FALSE, message=FALSE}
+import pandas as pd
+import os
+
+report_directory = "/".join(r.outputDir.split("/")[:-2])
+prim_loads = pd.DataFrame()
+
+for folder in os.listdir(report_directory):
+  if folder.startswith('.'):
+    pass
+  else:
+    data = pd.read_csv(report_directory + "/" + folder + "/missingness.csv")
+    data = data[data["primary"]]
+    data = data[["TabNam","ColNam", "UNIQUE_FREQ", "TEST_DATE"]]
+    prim_loads = prim_loads.append(data)
+```
+
 ```{r, echo=FALSE, warning=FALSE,  message=FALSE, fig.align='center', fig.height= 10,  fig.width= 10}
-comp <- DQTBL
-  
-ggplot(comp, aes(x=reorder(TEST_DATE,TEST_DATE), y=UNIQUE_FREQ, group = ColNam) ) + 
+ggplot(py$prim_loads, aes(x=reorder(TEST_DATE,TEST_DATE), y=UNIQUE_FREQ, group = ColNam) ) + 
   geom_line(aes(), alpha = 0.4,  size = 1, show.legend = FALSE) + 
   stat_smooth(colour = "red",level=0.99) +
   geom_point( alpha = 0.5, shape = 1, size = 6, colour = "#FF3333", stroke = 2, show.legend = FALSE) + 
@@ -182,6 +208,7 @@ Figures below show proportion of missing cells/values in each column of each tab
 
 * `MS1_FREQ` = Frequency of cells with NULL/NA values and empty strings in each column -- presence of absence
 * `MS2_FREQ` = Frequency of cells with characters in each column that don't represent meaningful data -- presence of nonsense 
+
 
 ```{r, echo=FALSE, ggplot, warning=FALSE,  message=FALSE, fig.align='center', fig.height= 5, fig.width= 12}
 DQTBL$MS1_PERC <- ifelse(DQTBL$Rows == 0, 0, round((DQTBL$MS1_FREQ)/DQTBL$Rows,2))
@@ -217,7 +244,7 @@ for (i in seq_along(table_list)) {
 plot_list
 ```
 
-##Data Model Tests
+## Data Model Tests
 
 ### Figure set 2. Common Key Variables
 Figures below visualize number of unique key variables that are common in multiple `r CDM` tables. 
@@ -229,142 +256,31 @@ Figures below visualize number of unique key variables that are common in multip
 * Count_In represent number of unique key variables that are present in the reference table -- e.g., person id from observation table that exist in person table as well.
 
 ```{r, echo=FALSE,  fig.align='center', fig.height= 3, fig.width= 10}
-DQTBL_KEYS <- DQTBL
-if (CDM %in% c("PCORNET3","PCORNET31")) {
-  patid<- filter(DQTBL_KEYS, ColNam == "patid")
-plot2 <- ggplot(data=patid, aes(x=reorder(TabNam, UNIQUE_FREQ), y=UNIQUE_FREQ)) +
-  geom_bar(stat="identity", width = 1, )+#aes(fill=Index)) +
-  scale_fill_manual(values=c("darkolivegreen3","firebrick1", "springgreen3")) +
-  ggtitle(paste("Count of Unique ",unique(patid$ColNam)," in Tables with ",unique(patid$ColNam),
-                sep="")) +
-  xlab(" Table Name") +
-  ylab("Frequency of Unique Values")
-(gg <- ggplotly(plot2))
-} else
-  if (CDM %in% c("OMOPV5_0","OMOPV5_2","OMOPV5_3")) {
-     person_id<- filter(DQTBL_KEYS, ColNam == "person_id")
- plot2 <- ggplot(data=person_id, aes(x=reorder(TabNam, UNIQUE_FREQ), y=UNIQUE_FREQ)) +
-   geom_bar(stat="identity", width = 1, )+#aes(fill=Index)) +
-   scale_fill_manual(values=c("darkolivegreen3","firebrick1", "springgreen3")) +
-   ggtitle(paste("Count of Unique ",unique(person_id$ColNam)," in Tables with ",unique(person_id$ColNam),
-                 sep="")) +
-   xlab(" Table Name") +
-   ylab("Frequency of Unique Values")
- (gg <- ggplotly(plot2))
-  }
-```
+plot_list<- list()
+ORPHAN <- read.csv(paste(py$outputDir, "orphan.csv", sep=""))
+KEYS <- unique(ORPHAN$ColNam)
+for (i in seq_along(KEYS)) {
 
-```{r, echo=FALSE, fig.align='center', fig.height= 3, fig.width= 10}
-if (CDM %in% c("PCORNET3","PCORNET31")) {
-  encounterid <- filter(DQTBL_KEYS, ColNam == "encounterid")
-plot3 <- ggplot(data=encounterid, aes(x=reorder(TabNam, UNIQUE_FREQ), y=UNIQUE_FREQ)) +
-  geom_bar(stat="identity", width = 1,)+# aes(fill=Index)) +
+  prim_col<- filter(ORPHAN, ColNam == KEYS[i])
+  
+  plot_list[[i]] <- ggplot(data=prim_col, aes(x=reorder(TabNam, UNIQUE_FREQ), y=UNIQUE_FREQ)) +
+  geom_bar(stat="identity", width = 1, aes(fill=Index)) +
   scale_fill_manual(values=c("darkolivegreen3","firebrick1", "springgreen3")) +
-  ggtitle(paste("Count of Unique ",unique(encounterid$ColNam)," in Tables with ",unique(encounterid$ColNam),
+  ggtitle(paste("Count of Unique ",unique(prim_col$ColNam)," in Tables with ",unique(prim_col$ColNam),
                 sep="")) +
   xlab(" Table Name") +
   ylab("Frequency of Unique Values")
-(gg <- ggplotly(plot3))
-} else
-  if (CDM %in% c("OMOPV5_0","OMOPV5_2","OMOPV5_3")) {
-     care_site_id<- filter(DQTBL_KEYS, ColNam == "care_site_id")
- 
- plot3 <- ggplot(data=care_site_id, aes(x=reorder(TabNam, UNIQUE_FREQ), y=UNIQUE_FREQ)) +
-   geom_bar(stat="identity", width = 1,)+# aes(fill=Index)) +
-   scale_fill_manual(values=c("darkolivegreen3","firebrick1", "springgreen3")) +
-   ggtitle(paste("Count of Unique ",unique(care_site_id$ColNam)," in Tables with ",unique(care_site_id$ColNam),
-                 sep="")) +
-   xlab(" Table Name") +
-   ylab("Frequency of Unique Values")
- (gg <- ggplotly(plot3))
 }
+plot_list
 ```
 
-```{r, echo=FALSE, fig.align='center', fig.height= 3, fig.width= 10}
-if (CDM %in% c("PCORNET3","PCORNET31")) {
-  providerid <- filter(DQTBL_KEYS, ColNam == "providerid")
-plot4 <- ggplot(data=providerid, aes(x=reorder(TabNam, UNIQUE_FREQ), y=UNIQUE_FREQ)) +
-  geom_bar(stat="identity", width = 1, )+#aes(fill=Index)) +
-  scale_fill_manual(values=c("darkolivegreen3","firebrick1", "springgreen3")) +
-  ggtitle(paste("Count of Unique ",unique(providerid$ColNam)," in Tables with ",unique(providerid$ColNam),
-                sep="")) +
-  xlab(" Table Name") +
-  ylab("Frequency of Unique Values")
-(gg <- ggplotly(plot4))
-} else
-  if (CDM %in% c("OMOPV5_0","OMOPV5_2","OMOPV5_3")) {
-     visit_occurrence_id<- filter(DQTBL_KEYS, ColNam == "visit_occurrence_id")
- 
- plot4 <- ggplot(data=visit_occurrence_id, aes(x=reorder(TabNam, UNIQUE_FREQ), y=UNIQUE_FREQ)) +
-   geom_bar(stat="identity", width = 1, )+#aes(fill=Index)) +
-   scale_fill_manual(values=c("darkolivegreen3","firebrick1", "springgreen3")) +
-   ggtitle(paste("Count of Unique ",unique(visit_occurrence_id$ColNam)," in Tables with ",unique(visit_occurrence_id$ColNam),
-                 sep="")) +
-   xlab(" Table Name") +
-   ylab("Frequency of Unique Values")
- (gg <- ggplotly(plot4))
-}
-```
-
-```{r, echo=FALSE, fig.align='center', fig.height= 3, fig.width= 10}
-if (CDM %in% c("PCORNET3","PCORNET31")) {
-  enc_type <- filter(DQTBL_KEYS, ColNam == "enc_type")
-plot5 <- ggplot(data=enc_type, aes(x=reorder(TabNam, UNIQUE_FREQ), y=UNIQUE_FREQ)) +
-  geom_bar(stat="identity", width = 1, )+#aes(fill=Index)) +
-  scale_fill_manual(values=c("darkolivegreen3","firebrick1", "springgreen3")) +
-  ggtitle(paste("Count of Unique ",unique(enc_type$ColNam)," in Tables with ",unique(enc_type$ColNam),
-                sep="")) +
-  xlab(" Table Name") +
-  ylab("Frequency of Unique Values")
-(gg <- ggplotly(plot5))
-} else
-  if (CDM %in% c("OMOPV5_0","OMOPV5_2","OMOPV5_3")) {
-     location_id<- filter(DQTBL_KEYS, ColNam == "location_id")
- 
- plot5 <- ggplot(data=location_id, aes(x=reorder(TabNam, UNIQUE_FREQ), y=UNIQUE_FREQ)) +
-   geom_bar(stat="identity", width = 1, )+#aes(fill=Index)) +
-   scale_fill_manual(values=c("darkolivegreen3","firebrick1", "springgreen3")) +
-   ggtitle(paste("Count of Unique ",unique(location_id$ColNam)," in Tables with ",unique(location_id$ColNam),
-                 sep="")) +
-   xlab(" Table Name") +
-   ylab("Frequency of Unique Values")
- (gg <- ggplotly(plot5))
-  }
-```
-
-```{r, echo=FALSE, fig.align='center', fig.height= 3, fig.width= 10}
-if (CDM %in% c("PCORNET3","PCORNET31")) {
-  prescribingid <- filter(DQTBL_KEYS, ColNam == "prescribingid")
-plot6 <- ggplot(data=prescribingid, aes(x=reorder(TabNam, UNIQUE_FREQ), y=UNIQUE_FREQ)) +
-  geom_bar(stat="identity", width = 1, )+#aes(fill=Index)) +
-  scale_fill_manual(values=c("darkolivegreen3","firebrick1", "springgreen3")) +
-  ggtitle(paste("Count of Unique ",unique(prescribingid$ColNam)," in Tables with ",unique(prescribingid$ColNam),
-                sep="")) +
-  xlab(" Table Name") +
-  ylab("Frequency of Unique Values")
-(gg <- ggplotly(plot6))
-} else
-  if (CDM %in% c("")) {
-     visit_detail_id<- filter(DQTBL_KEYS, ColNam == "visit_detail_id")
- 
- plot6 <- ggplot(data=visit_detail_id, aes(x=reorder(TabNam, UNIQUE_FREQ), y=UNIQUE_FREQ)) +
-   geom_bar(stat="identity", width = 1, )+#aes(fill=Index)) +
-   scale_fill_manual(values=c("darkolivegreen3","firebrick1", "springgreen3")) +
-   ggtitle(paste("Count of Unique ",unique(visit_detail_id$ColNam)," in Tables with ",unique(visit_detail_id$ColNam),
-                 sep="")) +
-   xlab(" Table Name") +
-   ylab("Frequency of Unique Values")
- (gg <- ggplotly(plot6))
-  }
-```
-
-##Test of Completeness in Key Clinical Indicators
+## Test of Completeness in Key Clinical Indicators
 
 ### Figure 5. Common Key Variables
-Figure 5 shows the parcentage of patients missing specific key clinical indicators. 
+Figure 5 shows the percentage of patients missing specific key clinical indicators. 
 
 ```{r, echo=FALSE, fig.align='center', fig.height= 5, fig.width= 10}
-withouts <- read.csv("/Users/mehadi/work/d2health/DQe-c-v2/mhTest/realTables/indicators_report.csv")
+withouts <- read.csv(paste(py$outputDir, "indicators.csv", sep=""))
   
 ggplot(withouts, aes(x=MISSING_PERCENTAGE,y=reorder(GROUP,-MISSING_PERCENTAGE), label = PERCENTAGE)) + 
     geom_point(aes(fill = MISSING_PERCENTAGE),shape = 21, colour = "black",  size = 8, stroke = 3, alpha = 0.9) +

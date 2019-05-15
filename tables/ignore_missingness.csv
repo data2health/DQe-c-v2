@@ -1,7 +1,0 @@
-"","X.1","X","TabNam","ColNam","DQLVL","abbr","cat","test_date","FRQ","UNIQFRQ","MS1_FRQ","MS2_FRQ","MSs_PERC","organization","CDM"
-"1",41,"82","person","person_id","X","psrn","clinical","10-10-2018",1000,1000,0,0,0,"University of Washington","OMOPV5_0"
-"2",70,"126","visit_occurrence","visit_occurrence_id","Yes","vsto","clinical","10-10-2018",47457,47457,0,0,0,"University of Washington","OMOPV5_0"
-"3",82,"138","procedure_occurrence","procedure_occurrence_id","Yes","prco","clinical","10-10-2018",62189,62189,0,0,0,"University of Washington","OMOPV5_0"
-"4",127,"183","condition_occurrence","condition_occurrence_id","Yes","cndo","clinical","10-10-2018",160322,160322,0,0,0,"University of Washington","OMOPV5_0"
-"5",138,"194","measurement","measurement_id","Yes","msrm","clinical","10-10-2018",2858,2858,0,0,0,"University of Washington","OMOPV5_0"
-"6",156,"221","observation","observation_id","Yes","obsr","clinical","10-10-2018",13481,13481,0,0,0,"University of Washington","OMOPV5_0"
