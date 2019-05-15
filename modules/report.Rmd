@@ -1,0 +1,295 @@
+---
+title: "DQe-c Report"
+output: 
+  html_document: 
+    highlight: tango
+params:
+  config: "config.json"
+  outputDir: "report"
+---
+
+```{r, echo=FALSE}
+library("reticulate")
+use_python("/anaconda/bin", required = T)
+config = params$config
+outputDir = params$outputDir
+```
+
+```{python, echo=FALSE}
+import json
+
+config = r.config
+outputDir = r.outputDir
+
+config = json.load(open(config))
+
+CDM = config["CDM"].upper()
+
+if CDM == "":
+        raise NameError(f"A Common Data Model (CDM) has not been defined in config file")
+elif CDM not in ["PCORNET3","PCORNET31","OMOPV5_0","OMOPV5_2","OMOPV5_3"]:
+        raise NameError(f"{CDM} is not a valid Common Data Model")
+
+organization = config["Organization"]
+```
+
+```{r, echo=FALSE, include=FALSE}
+CDM = py$CDM
+ORGANIZATION = py$organization
+```
+
+
+## Load and Test Details
+
+This DQec report is generated from testing completeness in `r CDM` data from `r ORGANIZATION` on `r Sys.Date()`. 
+
+### Table 1. List and Status of Common Data Model (CDM) -- here, `r CDM` -- Tables in this load
+The table below provides a list of CDM tables provided (and not provided) in the data load.
+
+The source data this table and the following graphics in this section are being generated from is reports/`r ORGANIZATION`/`r Sys.Date()`/tablelist.csv
+
+```{r, echo=FALSE, fig.align='center', fig.width= 10}
+dato <- read.csv(paste(py$outputDir, "tablelist.csv", sep=""))
+dato$TotalSizeKB <- ifelse(is.null(dato$TotalSizeKB) | is.na(dato$TotalSizeKB), 0, dato$TotalSizeKB)
+dato$TotalSizeGB <- round(as.numeric(dato$TotalSizeKB)/1000000,4)
+dato$Rows <- ifelse(is.null(dato$Rows) | is.na(dato$Rows), 0, dato$Rows)
+dato$status <- ifelse((dato$loaded == "True"), "Table available", "Table not available")
+dato$vSize <- rep(1,nrow(dato))
+
+#sub_dato <- subset(dato,primary=="TRUE")
+sub_dato <- distinct(dato,dato$TabNam, .keep_all = TRUE)
+datatable(select(sub_dato, TabNam, status, TotalSizeGB, Rows), options = list(pageLength = 5), filter = 'bottom')
+```
+
+### Figure 1. Available Tables, Compared to all CDM (`r CDM`) Tables
+This figure shows which of the CDM tables are loaded and/or available. 
+
+```{r, echo=FALSE, fig.align='center', fig.width= 10}
+treemap(sub_dato,
+        index=c("TabNam"),
+        vSize="vSize",
+        vColor="status",
+        type="categorical",
+        title = "",
+        title.legend = "Table Availability",
+        border.col = "white",
+        position.legend = "bottom"
+        )
+```
+
+### Figure 2. File Size and Row Numbers by Table in the (`r CDM`) Load
+```{r, echo=FALSE, fig.align='center', fig.width= 12}
+treemap(sub_dato,
+        index=c("TabNam"),
+        vSize="Rows",
+        vColor="TotalSizeGB",
+        type="value",
+        title = "",
+        title.legend = "Size represents number of rows and color represent file size (in GB) for each table.",
+        border.col = "white",
+        position.legend = "bottom"
+)
+```
+
+```{python, echo=FALSE}
+import pandas as pd
+from typing import List
+
+DQTBL: object = pd.read_csv(r.outputDir + "tablelist.csv")
+
+primaryPairs: object = DQTBL[DQTBL["primary"] == True][["ColNam", "TabNam"]]
+referencePairs: object = DQTBL[DQTBL["primary"] == False][["ColNam", "TabNam"]]
+
+referencePrimaryMerge: object = primaryPairs.merge(referencePairs, on="ColNam", how="right", suffixes=("_primary", "_reference"))
+referencePrimaryMerge.dropna(subset = ["TabNam_primary"], inplace=True)
+
+id=[]
+id_dict={}
+from_ind=[]
+to_ind=[]
+stat=[]
+
+prim=referencePrimaryMerge.TabNam_primary
+ref=referencePrimaryMerge.TabNam_reference
+comb=prim.append(ref, ignore_index=True).unique()
+
+for i in range(0,len(comb)):
+        id_dict[comb[i]]=i
+        stat.append("Table available") if (DQTBL[DQTBL["TabNam"]==comb[i]]["loaded"].unique()[0]==True) else stat.append("Table not available")
+        
+for i in range(0,len(id_dict)):
+        id.append(i)
+
+for _,row in referencePrimaryMerge.iterrows():
+        from_ind.append(id_dict[row['TabNam_primary']])
+        to_ind.append(id_dict[row['TabNam_reference']])
+
+label = list(id_dict.keys())
+```
+
+### Figure 3. Loaded tables against CDM (`r CDM`) Relational Model.
+The figure below shows a network visualization of the CDM data model, as well as highlighting the tables that are available in this load (legend is the same as in Figure 1).
+
+```{r, echo=FALSE, fig.align='center', fig.width= 10}
+dat.net <- py$referencePrimaryMerge
+
+nodes <- data.frame(id = py$id, 
+                  label = py$label,
+                  group = py$stat,
+                  #shadow = c(FALSE)
+                  shadow = F) # if OMOP, shadow = F 
+edges <- data.frame(from = py$from_ind, to = py$to_ind)
+visNetwork(nodes, edges) %>%
+
+visGroups(groupname = "Table not available", color = "#00C5CD", shape = "circle") %>%
+visGroups(groupname = "Table available", color = "#EE9572", shape = "circle") %>%
+
+visOptions(highlightNearest = TRUE, nodesIdSelection = T) %>% 
+visEdges(arrows = 'from', scaling = list(min = .5, max = 1)) %>%
+visInteraction(navigationButtons = T, dragView = FALSE, zoomView = FALSE)
+
+```
+
+
+## Completeness Results
+### Table 2. The Master Completeness Results Table
+The table below provides results of completeness test at the value/cell level.
+
+* `TabNam` = `r CDM`  table name
+* `ColNam` = Column name
+* `DQLVL` = Level of importance for completeness test. (`X`: Extremely Important, `H`: Highly Important, `L`:Low Importance)
+* `FREQ` = Frequency of rows
+* `UNIQUE_FREQ` = Frequency of unique values in each column
+* `MS1_FREQ` = Frequency of cells with NULL/NA values or empty strings in each column
+* `MS2_FREQ` = Frequency of cells with characters in each column that don't represent meaningful data -- including, '+', '-', '_','#', '$', '*', '\', '?', '.', '&', '^', '%', '!', '@', and 'NI'.
+* `MSs_PERCENTAGE` = Percentage of overall missing data in each column 
+Data for this table is generated from `r paste("DQ_Master_Table_",CDM,"_",ORGANIZATION,"_",as.character(format(Sys.Date(),"%d-%m-%Y")),".csv", sep="")` saved under report directory.
+
+```{r, echo=FALSE}
+#DQTBL <- dato
+DQTBL <- read.csv(paste(py$outputDir, "missingness.csv", sep=""))
+datatable(DQTBL[,c("TabNam","ColNam","DQLVL", "Rows", "UNIQUE_FREQ","MS1_FREQ","MS2_FREQ","MSs_PERCENTAGE", "TEST_DATE")], options = list(pageLength = 10), filter = 'bottom')
+```
+
+### Figure 4. Changes in Primary Keys Across Loads
+Figure below profiles changes in primary keys across loads as a measure of change in patient/record number over time.
+
+```{python, echo=FALSE, warning=FALSE, message=FALSE}
+import pandas as pd
+import os
+
+report_directory = "/".join(r.outputDir.split("/")[:-2])
+prim_loads = pd.DataFrame()
+
+for folder in os.listdir(report_directory):
+  if folder.startswith('.'):
+    pass
+  else:
+    data = pd.read_csv(report_directory + "/" + folder + "/missingness.csv")
+    data = data[data["primary"]]
+    data = data[["TabNam","ColNam", "UNIQUE_FREQ", "TEST_DATE"]]
+    prim_loads = prim_loads.append(data)
+```
+
+```{r, echo=FALSE, warning=FALSE,  message=FALSE, fig.align='center', fig.height= 10,  fig.width= 10}
+ggplot(py$prim_loads, aes(x=reorder(TEST_DATE,TEST_DATE), y=UNIQUE_FREQ, group = ColNam) ) + 
+  geom_line(aes(), alpha = 0.4,  size = 1, show.legend = FALSE) + 
+  stat_smooth(colour = "red",level=0.99) +
+  geom_point( alpha = 0.5, shape = 1, size = 6, colour = "#FF3333", stroke = 2, show.legend = FALSE) + 
+  geom_point( aes(col = TEST_DATE), shape = 20, size = 8,   show.legend = T) + 
+  theme(plot.title = element_text(family = "Trebuchet MS", color="#666666", face="bold", hjust=0)) +
+  xlab("Load") + ylab("Unique Counts") + 
+  facet_wrap(~TabNam, ncol = 3, switch = "x", scales = "free") +
+  theme(axis.text.x=element_text(colour="white", size = 0.1))
+```
+
+### Figure set 1. Proportion of Missing Data by Type in Loaded Tables
+Figures below show proportion of missing cells/values in each column of each table loaded. Figures are generated based on Table 2. 
+
+* `MS1_FREQ` = Frequency of cells with NULL/NA values and empty strings in each column -- presence of absence
+* `MS2_FREQ` = Frequency of cells with characters in each column that don't represent meaningful data -- presence of nonsense 
+
+
+```{r, echo=FALSE, ggplot, warning=FALSE,  message=FALSE, fig.align='center', fig.height= 5, fig.width= 12}
+DQTBL$MS1_PERC <- ifelse(DQTBL$Rows == 0, 0, round((DQTBL$MS1_FREQ)/DQTBL$Rows,2))
+DQTBL$MS2_PERC <- ifelse(DQTBL$Rows == 0, 0, round((DQTBL$MS2_FREQ)/DQTBL$Rows,2))
+DF <- subset(melt(DQTBL, id.var=c("TabNam","ColNam")), variable %in% c("MS1_PERC","MS2_PERC"))
+DF$value <- as.numeric(DF$value)
+colnames(DF)[3] <- "DQ_Issue"
+colnames(DF)[4] <- "Ratio"
+#####plotting
+plot_list<- list()
+table_list <- unique(DQTBL$TabNam)
+# create for loop to produce ggplot2 graphs 
+for (i in seq_along(table_list)) { 
+  
+  # create plot for each OMOP table in DQTBL 
+  plot_list[[i]] <- 
+    plot_list[[i]] <- 
+    ggplot(subset(DF, TabNam==table_list[i]),
+           aes(x=ColNam, y=Ratio, fill=DQ_Issue)) + 
+    geom_bar(stat="identity", width = 1) +
+    #     scale_fill_manual(values=c("red","green","orange","dark red")) +
+    facet_wrap( ~ ColNam, scale="free_x", nrow = 1) +
+    #     ggtitle("Frequency of Missing Data") +
+    xlab("Column") +
+    ylab("Frequency") +
+    theme(plot.title = element_text(family = "Trebuchet MS", color="#666666", face="bold", hjust=0),
+          axis.text.x = element_text(vjust = 1),
+          strip.text.x = element_text(angle = 90, face="bold")) +
+    theme(axis.text.x=element_blank())+    # theme(legend.position="none") + 
+    ggtitle(paste('Ratio of Missing Data in "', table_list[i], '" table', sep=''))
+  
+}
+plot_list
+```
+
+## Data Model Tests
+
+### Figure set 2. Common Key Variables
+Figures below visualize number of unique key variables that are common in multiple `r CDM` tables. 
+
+* The Reference column on the right comes from the table in which the variable is a primary key, and therefore is a reference for all other tables. 
+
+* Count_Out shows number of unique key variables that are not present in the reference table -- e.g., person id from observation table that does not exist in person table.
+
+* Count_In represent number of unique key variables that are present in the reference table -- e.g., person id from observation table that exist in person table as well.
+
+```{r, echo=FALSE,  fig.align='center', fig.height= 3, fig.width= 10}
+plot_list<- list()
+ORPHAN <- read.csv(paste(py$outputDir, "orphan.csv", sep=""))
+KEYS <- unique(ORPHAN$ColNam)
+for (i in seq_along(KEYS)) {
+
+  prim_col<- filter(ORPHAN, ColNam == KEYS[i])
+  
+  plot_list[[i]] <- ggplot(data=prim_col, aes(x=reorder(TabNam, UNIQUE_FREQ), y=UNIQUE_FREQ)) +
+  geom_bar(stat="identity", width = 1, aes(fill=Index)) +
+  scale_fill_manual(values=c("darkolivegreen3","firebrick1", "springgreen3")) +
+  ggtitle(paste("Count of Unique ",unique(prim_col$ColNam)," in Tables with ",unique(prim_col$ColNam),
+                sep="")) +
+  xlab(" Table Name") +
+  ylab("Frequency of Unique Values")
+}
+plot_list
+```
+
+## Test of Completeness in Key Clinical Indicators
+
+### Figure 5. Common Key Variables
+Figure 5 shows the percentage of patients missing specific key clinical indicators. 
+
+```{r, echo=FALSE, fig.align='center', fig.height= 5, fig.width= 10}
+withouts <- read.csv(paste(py$outputDir, "indicators.csv", sep=""))
+  
+ggplot(withouts, aes(x=MISSING_PERCENTAGE,y=reorder(GROUP,-MISSING_PERCENTAGE), label = PERCENTAGE)) + 
+    geom_point(aes(fill = MISSING_PERCENTAGE),shape = 21, colour = "black",  size = 8, stroke = 3, alpha = 0.9) +
+    geom_text(vjust = -0.5, hjust = -.38, nudge_y = 0, size = 4)+
+    scale_fill_gradient(limits=c(0, 100),low="#FFFAF0", high="#EE2C2C", guide=F,na.value="white")+
+    labs(x = "", y = "") +
+    scale_x_continuous(limits = c(0, 100)) + 
+    theme_minimal() +
+    theme(panel.grid.major.y = element_line(color = "gray",size = 2.5),
+          panel.grid.major.x = element_line(colour = "black", linetype = "dotted"),
+          axis.text.y=element_text(size=20, face="bold"))
+```

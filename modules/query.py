@@ -1,11 +1,6 @@
 import json
 import pandas
-
-try:
-    import cx_Oracle as oracle
-except ModuleNotFoundError:
-    import cx_oracle as oracle
-
+import subprocess
 import psycopg2 as postgresql
 import pyodbc as sqlserver
 import datetime
@@ -13,8 +8,16 @@ from typing import Dict, List
 import json
 import os
 
+try:
+    import cx_Oracle as oracle
+except ModuleNotFoundError:
+    import cx_oracle as oracle
+
 class Query:
     def __init__(self, config_file='config.json'):
+        
+        self.__config_file = config_file
+
         with open(config_file) as json_file:
             self.config = json.load(json_file)
 
@@ -106,14 +109,33 @@ class Query:
                                  ";PWD=" + self._password)
         return conn
 
-    
-    def outputReport(self, report_df, report_filename):
-        
+
+    def getConfigFile(self):
+        return self.__config_file
+
+    def getOutputDirectory(self):
         reportFolder = f"./reports/{self.organization}/{datetime.datetime.today().strftime('%m-%d-%Y')}/"
         if not (os.path.exists(reportFolder)):
             os.makedirs(reportFolder)
         
+        return reportFolder
+
+    
+    def outputReport(self, report_df, report_filename):
+        
+        reportFolder = self.getOutputDirectory()
         report_df.to_csv(f"{reportFolder}/{report_filename}", index=False)
+
+    
+    def generateHTMLReport(self):
+
+        command = 'Rscript'
+        scriptPath = './modules/run.R'
+
+        outDir      = self.getOutputDirectory()[1:]
+        config      = "../" + self.getConfigFile()
+        
+        subprocess.check_output([command, scriptPath, "-c", config, "-o", outDir], universal_newlines=True)
 
     
  

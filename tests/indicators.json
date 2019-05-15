@@ -84,7 +84,7 @@
         "indicator name": "Visit",
         "table": "visit_occurrence",
         "col": "visit_occurrence_id",
-        "label": "Vist",
+        "label": "Visit",
         "concepts": false
     }
 ]

@@ -34,6 +34,10 @@ def main(config):
     # new tests can be added to the Indicators.json file
     Indicator(query).get()
     print ("Indicators test has been run")
+    
+
+    # Generate HTML report
+    query.generateHTMLReport()
 
     return False
 

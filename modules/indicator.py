@@ -1,6 +1,7 @@
 import pandas
 import datetime
 import json
+from typing import Dict, List
 
 class Indicator:
     def __init__(self, query: object):
@@ -56,7 +57,7 @@ class Indicator:
                 "Ethnicity": ["Y"]
             }
         
-        if self.DBMS == "sql server" or self.DBMS == "oracle":
+        if self.query.DBMS == "sql server" or self.query.DBMS == "oracle":
             denominatorQuery: str = f"""
                                     SELECT COUNT(DISTINCT(PATID))
                                     FROM DEMOGRAPHIC
@@ -65,7 +66,7 @@ class Indicator:
                             SELECT COUNT(PATID)
                             FROM  (
                                     SELECT *
-                                    FROM {self.prefix}DEMOGRAPHIC
+                                    FROM {self.query.prefix}DEMOGRAPHIC
                                     WHERE BIRTH_DATE > 1900-01-01 AND BIRTH_DATE  < 2014-01-01
                                     ) dd
                             WHERE toupper({col}) NOT IN {exclude[group]} """
@@ -73,33 +74,32 @@ class Indicator:
                                     SELECT DISTINCT(toupper({col}))
                                     FROM   (
                                             SELECT *
-                                            FROM {self.prefix}DEMOGRAPHIC
+                                            FROM {self.query.prefix}DEMOGRAPHIC
                                             WHERE BIRTH_DATE > 1900-01-01 AND BIRTH_DATE  < 2014-01-01
                                             ) dd
                                     WHERE toupper({col}) NOT IN {exclude[group]} """
         
-        cursor = self.conn.cursor()
+        cursor = self.query.conn.cursor()
         denominator = cursor.execute(denominatorQuery)
         notin = cursor.execute(notinQuery)
         whattheyhave = cursor.execute(whattheyhaveQuery)
-        self.conn.close()
+        self.query.conn.close()
 
         d1: int = round((notin/denominator)*100,4)
         
         return pandas.DataFrame({
                                 "GROUP": [group],
-                                "MISSING PERCENTAGE": [d1],
-                                "MISSING POPULATION": [notin],
+                                "MISSING_PERCENTAGE": [d1],
+                                "MISSING_POPULATION": [notin],
                                 "DENOMINATOR": [denominator],
                                 "PERCENTAGE": [str(round(d1,2))+"%"],
                                 "TEST_DATE": [datetime.datetime.today().strftime('%m-%d-%Y')],
-                                "ORGANIZATION": [self.organization],
-                                "CDM": [self.CDM]
+                                "ORGANIZATION": [self.query.organization],
+                                "CDM": [self.query.CDM]
                                 })
 
     
 
-    # WHY IS CONCEPT AN ARG WHEN IT IS ALWAYS EMPTY?
     def isPresentOMOP(self, table: str, col: str, group: str, concepts = False) -> object:
         
         denominatorQuery: str = f"""
@@ -147,8 +147,8 @@ class Indicator:
 
         return pandas.DataFrame({
                                 "GROUP": [group],
-                                "MISSING PERCENTAGE": [pwse],
-                                "MISSING POPULATION": [denominator-pats_with_one],
+                                "MISSING_PERCENTAGE": [pwse],
+                                "MISSING_POPULATION": [denominator-pats_with_one],
                                 "DENOMINATOR": [denominator],
                                 "PERCENTAGE": [str(round(pwse,2))+"%"],
                                 "TEST_DATE": [datetime.datetime.today().strftime('%m-%d-%Y')],
@@ -171,8 +171,8 @@ class Indicator:
     def missing_variable(self, group, concept = "", ):
         return pandas.DataFrame({
             "GROUP": [group if concept == "" else concept],
-            "MISSING PERCENTAGE": [100],
-            "MISSING POPULATION": [0],
+            "MISSING_PERCENTAGE": [100],
+            "MISSING_POPULATION": [0],
             "DENOMINATOR": [0],
             "PERCENTAGE": [str(round(0.00,2))+"%"],
             "TEST_DATE": [datetime.datetime.today().strftime('%m-%d-%Y')],
