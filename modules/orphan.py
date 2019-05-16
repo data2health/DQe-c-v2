@@ -69,7 +69,7 @@ class Orphan:
         external =  row["TabNam_external"]
         col      =  row["ColNam"]
         query = f"""
-            SELECT COUNT(DISTINCT({col}))
+            SELECT COUNT(DISTINCT({col})) as count
             FROM {self.query.prefix}{external} as ext
             WHERE NOT EXISTS 
             (
@@ -88,7 +88,7 @@ class Orphan:
         col      =  row["ColNam"]
 
         query = f"""
-            SELECT COUNT(DISTINCT(ext.{col}))
+            SELECT COUNT(DISTINCT(ext.{col})) as count
             FROM {self.query.prefix}{primary} prim LEFT JOIN {self.query.prefix}{external} ext ON prim.{col}=ext.{col}
         """
 

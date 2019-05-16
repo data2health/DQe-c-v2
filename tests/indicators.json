@@ -30,7 +30,7 @@
     {
         "indicator name": "smoking status",
         "table": "OBSERVATION", 
-        "col": "measurement_concept_id", 
+        "col": "observation_concept_id", 
         "label": "Smoker",
         "concepts": [4310250, 40299112, 40329177, 40298672, 40329167, 42536346, 46270534,
                             4144272, 45879404, 42872410, 40298657, 45883537, 45884038, 4298794,
