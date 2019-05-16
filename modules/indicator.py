@@ -44,6 +44,7 @@ class Indicator:
 
                 except Exception as e:
                     output = "Error"
+                    print (e)
 
             indicators = pandas.concat(indicators_output, ignore_index=True)
 
@@ -103,13 +104,13 @@ class Indicator:
     def isPresentOMOP(self, table: str, col: str, group: str, concepts = False) -> object:
         
         denominatorQuery: str = f"""
-                            SELECT COUNT(DISTINCT(person_id))
+                            SELECT COUNT(DISTINCT(person_id)) as count
                             FROM {self.query.prefix}PERSON """
 
         ## If a concept list is present, will check that the column value is in that list
         if concepts:
             pats_with_oneQuery: str = f"""
-                                SELECT COUNT(DISTINCT(person_id)) 
+                                SELECT COUNT(DISTINCT(person_id)) as count
                                 FROM {self.query.prefix}{table} 
                                 WHERE {col} IN ({concepts}) """
         
@@ -120,7 +121,7 @@ class Indicator:
             if self.query.DBMS == "oracle":
                 
                 pats_with_oneQuery: str = f"""
-                                            SELECT COUNT(DISTINCT(person_id))
+                                            SELECT COUNT(DISTINCT(person_id)) as count
                                             FROM {self.query.prefix}{table} 
                                             WHERE {col} IS NOT NULL AND TO_CHAR({col}) NOT IN ({exclude}) """
 
@@ -128,7 +129,7 @@ class Indicator:
             elif self.query.DBMS in ["sql server", "redshift", "postgresql"]:
                 
                 pats_with_oneQuery: str = f"""
-                                            SELECT COUNT(DISTINCT(person_id)) 
+                                            SELECT COUNT(DISTINCT(person_id)) as count
                                             FROM {self.query.prefix}{table}
                                             WHERE {col} IS NOT NULL AND CAST({col} AS CHAR(54)) NOT IN ({exclude}) """
 

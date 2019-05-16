@@ -19,13 +19,12 @@ def main(config):
     print ("Differences has been run")
 
 
-    ## Adds the missingness statistics to the query.DQTBL object
+    ## Generates the missingness statistics report
     Missingness(query).missing()
     print ("Missingness tests have been run")
 
 
     # run the orphan key calculations
-    # adds the orphan calculations to the query.DQTBL object
     Orphan(query).orphan()
     print ("Orphan Key test has been run")
 

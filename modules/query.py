@@ -55,7 +55,9 @@ class Query:
         elif self.DBMS == "redshift":
             self.conn = self.Redshift()
         elif self.DBMS == "sql server":
-            self.conn = self.SQLServer()
+            #self.conn = self.SQLServer()
+            self.conn = "SQL SERVER"
+            pass
         elif self.DBMS == "":
             raise NameError("No DBMS defined in config.json")
         else:
