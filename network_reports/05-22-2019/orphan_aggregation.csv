@@ -1,0 +1,173 @@
+TabNam,ColNam,UNIQUE_FREQ,Index,organization
+person,person_id,50187,Reference,DataQuest_St.Marys
+visit_occurrence,visit_occurrence_id,0,Reference,DataQuest_St.Marys
+location,location_id,12,Reference,DataQuest_St.Marys
+care_site,care_site_id,10,Reference,DataQuest_St.Marys
+provider,provider_id,250,Reference,DataQuest_St.Marys
+visit_occurrence,person_id,0,Count_In,DataQuest_St.Marys
+procedure_occurrence,person_id,29316,Count_In,DataQuest_St.Marys
+drug_exposure,person_id,27812,Count_In,DataQuest_St.Marys
+condition_occurrence,person_id,30108,Count_In,DataQuest_St.Marys
+observation,person_id,37165,Count_In,DataQuest_St.Marys
+procedure_occurrence,visit_occurrence_id,0,Count_In,DataQuest_St.Marys
+drug_exposure,visit_occurrence_id,0,Count_In,DataQuest_St.Marys
+condition_occurrence,visit_occurrence_id,0,Count_In,DataQuest_St.Marys
+observation,visit_occurrence_id,0,Count_In,DataQuest_St.Marys
+person,location_id,1,Count_In,DataQuest_St.Marys
+care_site,location_id,10,Count_In,DataQuest_St.Marys
+person,care_site_id,0,Count_In,DataQuest_St.Marys
+visit_occurrence,care_site_id,0,Count_In,DataQuest_St.Marys
+provider,care_site_id,6,Count_In,DataQuest_St.Marys
+person,provider_id,68,Count_In,DataQuest_St.Marys
+visit_occurrence,person_id,0,Count_Out,DataQuest_St.Marys
+procedure_occurrence,person_id,0,Count_Out,DataQuest_St.Marys
+drug_exposure,person_id,0,Count_Out,DataQuest_St.Marys
+condition_occurrence,person_id,0,Count_Out,DataQuest_St.Marys
+observation,person_id,0,Count_Out,DataQuest_St.Marys
+procedure_occurrence,visit_occurrence_id,15429,Count_Out,DataQuest_St.Marys
+drug_exposure,visit_occurrence_id,0,Count_Out,DataQuest_St.Marys
+condition_occurrence,visit_occurrence_id,117472,Count_Out,DataQuest_St.Marys
+observation,visit_occurrence_id,0,Count_Out,DataQuest_St.Marys
+person,location_id,0,Count_Out,DataQuest_St.Marys
+care_site,location_id,0,Count_Out,DataQuest_St.Marys
+person,care_site_id,0,Count_Out,DataQuest_St.Marys
+visit_occurrence,care_site_id,0,Count_Out,DataQuest_St.Marys
+provider,care_site_id,0,Count_Out,DataQuest_St.Marys
+person,provider_id,0,Count_Out,DataQuest_St.Marys
+person,person_id,104893,Reference,DataQuest_Yakima
+visit_occurrence,visit_occurrence_id,9244134,Reference,DataQuest_Yakima
+location,location_id,1264,Reference,DataQuest_Yakima
+care_site,care_site_id,35,Reference,DataQuest_Yakima
+provider,provider_id,2175,Reference,DataQuest_Yakima
+visit_occurrence,person_id,89646,Count_In,DataQuest_Yakima
+procedure_occurrence,person_id,44002,Count_In,DataQuest_Yakima
+drug_exposure,person_id,47177,Count_In,DataQuest_Yakima
+condition_occurrence,person_id,53859,Count_In,DataQuest_Yakima
+observation,person_id,73227,Count_In,DataQuest_Yakima
+procedure_occurrence,visit_occurrence_id,0,Count_In,DataQuest_Yakima
+drug_exposure,visit_occurrence_id,0,Count_In,DataQuest_Yakima
+condition_occurrence,visit_occurrence_id,0,Count_In,DataQuest_Yakima
+observation,visit_occurrence_id,0,Count_In,DataQuest_Yakima
+person,location_id,1228,Count_In,DataQuest_Yakima
+care_site,location_id,35,Count_In,DataQuest_Yakima
+person,care_site_id,0,Count_In,DataQuest_Yakima
+visit_occurrence,care_site_id,34,Count_In,DataQuest_Yakima
+provider,care_site_id,20,Count_In,DataQuest_Yakima
+person,provider_id,187,Count_In,DataQuest_Yakima
+visit_occurrence,person_id,0,Count_Out,DataQuest_Yakima
+procedure_occurrence,person_id,0,Count_Out,DataQuest_Yakima
+drug_exposure,person_id,0,Count_Out,DataQuest_Yakima
+condition_occurrence,person_id,0,Count_Out,DataQuest_Yakima
+observation,person_id,0,Count_Out,DataQuest_Yakima
+procedure_occurrence,visit_occurrence_id,0,Count_Out,DataQuest_Yakima
+drug_exposure,visit_occurrence_id,0,Count_Out,DataQuest_Yakima
+condition_occurrence,visit_occurrence_id,0,Count_Out,DataQuest_Yakima
+observation,visit_occurrence_id,0,Count_Out,DataQuest_Yakima
+person,location_id,0,Count_Out,DataQuest_Yakima
+care_site,location_id,0,Count_Out,DataQuest_Yakima
+person,care_site_id,0,Count_Out,DataQuest_Yakima
+visit_occurrence,care_site_id,0,Count_Out,DataQuest_Yakima
+provider,care_site_id,0,Count_Out,DataQuest_Yakima
+person,provider_id,0,Count_Out,DataQuest_Yakima
+person,person_id,36001,Reference,DataQuest_Pocatello
+visit_occurrence,visit_occurrence_id,661099,Reference,DataQuest_Pocatello
+location,location_id,793,Reference,DataQuest_Pocatello
+care_site,care_site_id,1,Reference,DataQuest_Pocatello
+provider,provider_id,208,Reference,DataQuest_Pocatello
+observation_period,person_id,0,Count_In,DataQuest_Pocatello
+death,person_id,0,Count_In,DataQuest_Pocatello
+visit_occurrence,person_id,17862,Count_In,DataQuest_Pocatello
+procedure_occurrence,person_id,19701,Count_In,DataQuest_Pocatello
+drug_exposure,person_id,20449,Count_In,DataQuest_Pocatello
+condition_occurrence,person_id,24053,Count_In,DataQuest_Pocatello
+observation,person_id,27674,Count_In,DataQuest_Pocatello
+procedure_occurrence,visit_occurrence_id,162437,Count_In,DataQuest_Pocatello
+drug_exposure,visit_occurrence_id,0,Count_In,DataQuest_Pocatello
+condition_occurrence,visit_occurrence_id,171675,Count_In,DataQuest_Pocatello
+observation,visit_occurrence_id,0,Count_In,DataQuest_Pocatello
+person,location_id,791,Count_In,DataQuest_Pocatello
+care_site,location_id,1,Count_In,DataQuest_Pocatello
+person,care_site_id,0,Count_In,DataQuest_Pocatello
+visit_occurrence,care_site_id,1,Count_In,DataQuest_Pocatello
+provider,care_site_id,0,Count_In,DataQuest_Pocatello
+person,provider_id,96,Count_In,DataQuest_Pocatello
+observation_period,person_id,0,Count_Out,DataQuest_Pocatello
+death,person_id,0,Count_Out,DataQuest_Pocatello
+visit_occurrence,person_id,0,Count_Out,DataQuest_Pocatello
+procedure_occurrence,person_id,0,Count_Out,DataQuest_Pocatello
+drug_exposure,person_id,0,Count_Out,DataQuest_Pocatello
+condition_occurrence,person_id,0,Count_Out,DataQuest_Pocatello
+observation,person_id,0,Count_Out,DataQuest_Pocatello
+procedure_occurrence,visit_occurrence_id,0,Count_Out,DataQuest_Pocatello
+drug_exposure,visit_occurrence_id,0,Count_Out,DataQuest_Pocatello
+condition_occurrence,visit_occurrence_id,0,Count_Out,DataQuest_Pocatello
+observation,visit_occurrence_id,0,Count_Out,DataQuest_Pocatello
+person,location_id,0,Count_Out,DataQuest_Pocatello
+care_site,location_id,0,Count_Out,DataQuest_Pocatello
+person,care_site_id,0,Count_Out,DataQuest_Pocatello
+visit_occurrence,care_site_id,0,Count_Out,DataQuest_Pocatello
+provider,care_site_id,0,Count_Out,DataQuest_Pocatello
+person,provider_id,0,Count_Out,DataQuest_Pocatello
+person,person_id,4876945,Reference,University of Washington
+visit_occurrence,visit_occurrence_id,22119764,Reference,University of Washington
+location,location_id,4879294,Reference,University of Washington
+care_site,care_site_id,3164,Reference,University of Washington
+provider,provider_id,236990,Reference,University of Washington
+observation_period,person_id,1294646,Count_In,University of Washington
+specimen,person_id,0,Count_In,University of Washington
+death,person_id,38004,Count_In,University of Washington
+visit_occurrence,person_id,1294646,Count_In,University of Washington
+procedure_occurrence,person_id,764327,Count_In,University of Washington
+drug_exposure,person_id,855354,Count_In,University of Washington
+device_exposure,person_id,0,Count_In,University of Washington
+condition_occurrence,person_id,1021894,Count_In,University of Washington
+measurement,person_id,1115420,Count_In,University of Washington
+observation,person_id,390129,Count_In,University of Washington
+procedure_occurrence,visit_occurrence_id,4110247,Count_In,University of Washington
+drug_exposure,visit_occurrence_id,1076416,Count_In,University of Washington
+device_exposure,visit_occurrence_id,0,Count_In,University of Washington
+condition_occurrence,visit_occurrence_id,5447607,Count_In,University of Washington
+measurement,visit_occurrence_id,13364644,Count_In,University of Washington
+observation,visit_occurrence_id,1152,Count_In,University of Washington
+person,location_id,4876945,Count_In,University of Washington
+care_site,location_id,2337,Count_In,University of Washington
+person,care_site_id,179,Count_In,University of Washington
+visit_occurrence,care_site_id,1375,Count_In,University of Washington
+provider,care_site_id,0,Count_In,University of Washington
+person,provider_id,31200,Count_In,University of Washington
+visit_occurrence,provider_id,2718,Count_In,University of Washington
+procedure_occurrence,provider_id,5558,Count_In,University of Washington
+drug_exposure,provider_id,5358,Count_In,University of Washington
+device_exposure,provider_id,0,Count_In,University of Washington
+condition_occurrence,provider_id,0,Count_In,University of Washington
+measurement,provider_id,9186,Count_In,University of Washington
+observation,provider_id,4587,Count_In,University of Washington
+observation_period,person_id,856,Count_Out,University of Washington
+specimen,person_id,0,Count_Out,University of Washington
+death,person_id,5,Count_Out,University of Washington
+visit_occurrence,person_id,856,Count_Out,University of Washington
+procedure_occurrence,person_id,37,Count_Out,University of Washington
+drug_exposure,person_id,997,Count_Out,University of Washington
+device_exposure,person_id,0,Count_Out,University of Washington
+condition_occurrence,person_id,2659,Count_Out,University of Washington
+measurement,person_id,315,Count_Out,University of Washington
+observation,person_id,1110,Count_Out,University of Washington
+procedure_occurrence,visit_occurrence_id,0,Count_Out,University of Washington
+drug_exposure,visit_occurrence_id,0,Count_Out,University of Washington
+device_exposure,visit_occurrence_id,0,Count_Out,University of Washington
+condition_occurrence,visit_occurrence_id,0,Count_Out,University of Washington
+measurement,visit_occurrence_id,0,Count_Out,University of Washington
+observation,visit_occurrence_id,1201,Count_Out,University of Washington
+person,location_id,0,Count_Out,University of Washington
+care_site,location_id,814,Count_Out,University of Washington
+person,care_site_id,516,Count_Out,University of Washington
+visit_occurrence,care_site_id,0,Count_Out,University of Washington
+provider,care_site_id,0,Count_Out,University of Washington
+person,provider_id,0,Count_Out,University of Washington
+visit_occurrence,provider_id,0,Count_Out,University of Washington
+procedure_occurrence,provider_id,1,Count_Out,University of Washington
+drug_exposure,provider_id,0,Count_Out,University of Washington
+device_exposure,provider_id,0,Count_Out,University of Washington
+condition_occurrence,provider_id,0,Count_Out,University of Washington
+measurement,provider_id,17,Count_Out,University of Washington
+observation,provider_id,2,Count_Out,University of Washington

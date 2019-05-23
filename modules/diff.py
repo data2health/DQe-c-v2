@@ -32,6 +32,13 @@ class Diff:
 
         tablelist = DQTBL[["TabNam", "ColNam", "Rows", "TotalSizeKB", "loaded", "primary"]].drop_duplicates()
         self.query.outputReport(tablelist, "tablelist.csv")
+
+
+        ## If none of the tables appear to be loaded, the program quits.
+        if len(tablelist[tablelist["loaded"]]) == 0:
+            print ("This database seems to be empty. See the tablelist.csv report for more information.")
+            exit()
+
         #tablelist.to_csv("reports/tablelist.csv")
 
         ## ======================================================================================

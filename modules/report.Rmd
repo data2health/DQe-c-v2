@@ -54,6 +54,7 @@ dato$TotalSizeKB <- ifelse(is.null(dato$TotalSizeKB) | is.na(dato$TotalSizeKB), 
 dato$TotalSizeGB <- round(as.numeric(dato$TotalSizeKB)/1000000,4)
 dato$Rows <- ifelse(is.null(dato$Rows) | is.na(dato$Rows), 0, dato$Rows)
 dato$status <- ifelse((dato$loaded == "True"), "Table available", "Table not available")
+dato$status[(dato$Rows == 0) & (dato$loaded == "True")] <- "Table empty"
 dato$vSize <- rep(1,nrow(dato))
 
 #sub_dato <- subset(dato,primary=="TRUE")
