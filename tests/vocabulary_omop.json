@@ -1,0 +1,34 @@
+[
+    {
+        "table": "observation",
+        "column": "observation_concept_id"
+    },
+    {
+        "table": "measurement",
+        "column": "measurement_concept_id"
+    },
+    {
+        "table": "drug_exposure",
+        "column": "drug_concept_id"
+    },
+    {
+        "table": "death",
+        "column": "cause_concept_id"
+    },
+    {
+        "table": "specimen",
+        "column": "specimen_concept_id"
+    },
+    {
+        "table": "procedure_occurrence",
+        "column": "procedure_concept_id"
+    },
+    {
+        "table": "device_exposure",
+        "column": "device_concept_id"
+    },
+    {
+        "table": "condition_occurrene",
+        "column": "condition_concept_id"
+    }
+]

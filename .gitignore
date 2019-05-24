@@ -5,5 +5,8 @@ configs/config_*
 DQe_viz.twb
 *.pyc
 modules/*.pyc
+modules/arch-vue
+modules/network_view_placeholder.Rmd
+network_reports/*
 reports/*
 mhTest/

@@ -86,5 +86,19 @@
         "col": "visit_occurrence_id",
         "label": "Visit",
         "concepts": false
+    },
+    {
+        "indicator name": "Observations",
+        "table": "observation",
+        "col": "observation_id",
+        "label": "Observation",
+        "concepts": false
+    },
+    {
+        "indicator name": "Birth date",
+        "table": "person",
+        "col": "year_of_birth",
+        "label": "Birth date",
+        "concepts": false
     }
 ]

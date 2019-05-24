@@ -43,11 +43,11 @@ class Diff:
 
         ## ======================================================================================
 
-        # removes all table and col references that are not loaded in the actual database
+        # removes all table and col references that are not loaded or are empty in the actual database
         # this is mainly so we don't try and query non-existant tables down the road
         # write the DQTBL object to query to track our progress
         
-        self.query.DQTBL = DQTBL[DQTBL["loaded"]]
+        self.query.DQTBL = DQTBL[(DQTBL["loaded"]) | (DQTBL["Rows"] == 0)]
 
 
     def dbSize(self):

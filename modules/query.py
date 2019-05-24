@@ -20,35 +20,52 @@ class Query:
         self.__config_file = config_file
         self.vis = vis
 
-        with open(config_file) as json_file:
-            self.config = json.load(json_file)
+        if self.vis not in ["network-only"]:
+            
+            with open(config_file) as json_file:
+                self.config = json.load(json_file)
 
-        self.CDM: str = self.config["CDM"].upper()
-        if self.CDM == "":
-            raise NameError(f"A Common Data Model (CDM) has not been defined in {config_file}")
-        elif self.CDM not in ["PCORNET3","PCORNET31","OMOPV5_0","OMOPV5_2","OMOPV5_3"]:
-            raise NameError(f"{self.CDM} is not a valid Common Data Model")
+            self.CDM: str = self.config["CDM"].upper()
+            if self.CDM == "":
+                raise NameError(f"A Common Data Model (CDM) has not been defined in {config_file}")
+            elif self.CDM not in ["PCORNET3","PCORNET31","OMOPV5_0","OMOPV5_2","OMOPV5_3"]:
+                raise NameError(f"{self.CDM} is not a valid Common Data Model")
 
 
-        self.organization: str = self.config["Organization"]
-        self._user: str = self.config["Credentials"]["User"]
-        self._password: str = self.config["Credentials"]["Password"]
-        self.database: str = self.config["database"]
-        self.host: str = self.config["ConnectionDetails"]["Host"]
-        self.port: str = self.config["ConnectionDetails"]["Port"]
-        self.schema: str = self.config["schema"]
-        self.vocab_schema: str = self.config["vocabulary schema"]
+            self.organization: str = self.config["Organization"]
+            self._user: str = self.config["Credentials"]["User"]
+            self._password: str = self.config["Credentials"]["Password"]
+            self.database: str = self.config["database"]
+            self.host: str = self.config["ConnectionDetails"]["Host"]
+            self.port: str = self.config["ConnectionDetails"]["Port"]
+            
+            self.schema: str = self.config["schema"]
+            self.vocab_schema: str = self.config["vocabulary schema"]
 
-        self.DQTBL: object = {
-                                "PCORNET3": pandas.read_csv("./CDMs/DQTBL_pcornet_v3.csv"),
-                                "PCORNET31": pandas.read_csv("./CDMs/DQTBL_pcornet_v31.csv"),
-                                "OMOPV5_0": pandas.read_csv("./CDMs/DQTBL_omop_v5_0.csv"),
-                                "OMOPV5_2": pandas.read_csv("./CDMs/DQTBL_omop_v5_2.csv"),
-                                "OMOPV5_3": pandas.read_csv("./CDMs/DQTBL_omop_v5_3.csv")
-                                ## Add new common data models here
-                             }[self.CDM]
+            self.DQTBL: object = {
+                                    "PCORNET3": pandas.read_csv("./CDMs/DQTBL_pcornet_v3.csv"),
+                                    "PCORNET31": pandas.read_csv("./CDMs/DQTBL_pcornet_v31.csv"),
+                                    "OMOPV5_0": pandas.read_csv("./CDMs/DQTBL_omop_v5_0.csv"),
+                                    "OMOPV5_2": pandas.read_csv("./CDMs/DQTBL_omop_v5_2.csv"),
+                                    "OMOPV5_3": pandas.read_csv("./CDMs/DQTBL_omop_v5_3.csv")
+                                    ## Add new common data models here
+                                }[self.CDM]
 
-        self.DBMS: str = self.config["DBMS"].lower()
+            self.DBMS: str = self.config["DBMS"].lower()
+
+            if self.schema != "":
+                self.prefix = self.database + "." + self.schema + "."
+                self.query_prefix = f"'{self.schema}.' ||"
+            else:
+                self.prefix = ""
+                self.query_prefix = ""
+
+
+            if self.vocab_schema != "":
+                self.vocab_prefix = self.database + "." + self.vocab_schema + "."
+            else:
+                self.vocab_prefix = ""
+
 
         if vis in ["site-only", "network-only"]:
             self.conn = "No Connection"
@@ -65,20 +82,6 @@ class Query:
                 raise NameError("No DBMS defined in config.json")
             else:
                 raise NameError("'%s' is not an accepted DBMS" % self.DBMS)
-
-
-        if self.schema != "":
-            self.prefix = self.database + "." + self.schema + "."
-            self.query_prefix = f"'{self.schema}.' ||"
-        else:
-            self.prefix = ""
-            self.query_prefix = ""
-
-
-        if self.vocab_schema != "":
-            self.vocab_prefix = self.database + "." + self.vocab_schema + "."
-        else:
-            self.vocab_prefix = ""
 
 
     def Oracle(self):

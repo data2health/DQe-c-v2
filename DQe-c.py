@@ -1,6 +1,6 @@
 """
 This code was developed by the University of Washington
-
+and funded by CD2H and ITHS
 """
 
 
@@ -9,6 +9,7 @@ from modules.missingness import Missingness
 from modules.indicator import Indicator
 from modules.query import Query
 from modules.diff import Diff
+from modules.vocabulary import Vocab
 from modules.network import Network
 import pandas as pd
 import argparse
@@ -16,11 +17,14 @@ from argparse import RawTextHelpFormatter
 
 def main(config, vis):
 
+    #-----------------------------------------
+    # Data Quality Modules
+    #-----------------------------------------
 
     ## initiate database connection and tool configurations
     query = Query(config, vis)
 
-    # if -v options are site-only or network-only, the tool skips the modules
+    # if the -v option is site-only or network-only, the tool skips the modules
     if vis in ["site-only", "network-only"]:
         pass
     else:
@@ -28,7 +32,7 @@ def main(config, vis):
         ## Generates the reports/tablelist.csv file
         ## Filters the query.DQTBL object to include only tables that
         ## are present in the live database. 
-        # Module will quite program if no tables are loaded
+        # Module will quit program if no tables are loaded
         Diff(query).createDifference()
         print ("Differences has been run")
 
@@ -49,21 +53,34 @@ def main(config, vis):
         print ("Indicators test has been run")
         
 
+        # ----- UNDER DEVELOPMENT ------
+        # run the Vocabulary check tests
+        # checks which vocabularies your terms are in
+        #Vocab(query).vocabulary()
+        #print ("Vocabulary test has been run")
+        #-------------------------------
+
+
         #----------------------
         #Add new modules here!
-        #For more information on creating modules, see the wiki documentation.
+        #For more information on creating modules, see the github wiki documentation.
         #----------------------
 
 
-    if vis in ["none"]:
-        pass
-    elif vis in ["network-only", "network", "all"]:
+    #-----------------------------------------
+    # Visualization and Network Options
+    #-----------------------------------------
+    if vis in ["network-only", "network", "all"]:
         # Builds the network aggregation reports
         Network(query).createAggregateReports()
 
+
+        # ----- UNDER DEVELOPMENT ------
         # Generates network view HTML report
-        Network(query).generateNetworkHTMLReport()
-    else:
+        # Network(query).generateNetworkHTMLReport()
+        #-------------------------------
+    
+    if vis in ["site", "site-only", "all"]:
         # Generates site specific HTML report
         query.generateHTMLReport()
 
