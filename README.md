@@ -191,7 +191,7 @@ Example 1 - the script would run the modules as well as generate the site-level 
 ```
 python DQe-c-v2 -c config/config_site-1 -v site
 ```
-Example 2 - the script would use the latest report file from the organization in the config file without running any of the tests.
+Example 2 - the script would use the latest report file from the organization in the config file to generate the visualization dashboard without running any of the tests.
 ```
 python DQe-c-v2 -c config/config_org2 -v site-only
 ```
