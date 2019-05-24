@@ -1,0 +1,176 @@
+---
+title: "DQe-c Aggregate Dashboard"
+output: 
+  html_document: 
+    highlight: espresso
+    toc: yes
+---
+
+```{r, echo=FALSE}
+library("reticulate")
+use_python("/anaconda/bin", required = T)
+```
+
+```{r, echo=FALSE, warning=FALSE, include=FALSE}
+
+##processing data
+require(data.table);require(dplyr);require(ggplot2);require(gridExtra);require(rmarkdown);require(knitr):require(plotly);require(DT);require(ggrepel);require(treemap)
+```
+
+
+```{python, echo=FALSE}
+
+import pandas as pd
+table_loads = pd.read_csv("../network_reports/05-23-2019/all_missingness_aggregation.csv")
+table_loads = table_loads[table_loads["primary"]]
+table_loads = table_loads[table_loads["TabNam"].isin(["person", "measurement", "condition_occurrence", "visit_occurrence"])]
+```
+
+## Network-wide changes in the main clinical tables by site and across data reload
+
+```{r, echo=FALSE, warning=FALSE, fig.align='center', fig.width= 10, fig.height= 10, dpi= 200, fig.align='center'}
+
+options(scipen=999)
+
+ggplot(py$table_loads,aes(x=TEST_DATE, y = UNIQUE_FREQ, group=factor(ORGANIZATION))) +
+  # geom_boxplot(aes(color=organization), alpha=0.2) +
+  geom_point(aes(color=ORGANIZATION), shape = 21, size = 4, stroke= 1) + 
+  geom_line(aes(color=ORGANIZATION), alpha= 0.6)+
+  geom_text_repel(aes(label = ORGANIZATION))+
+  facet_wrap( ~ TabNam, scale="free_y", ncol = 2) +
+  scale_fill_gradient(limits=c(0, 1),low="#FFFAF0", high="#EE2C2C", guide=F ,na.value="white")+
+  theme(panel.grid.major.x = element_line(colour = "gray"),
+        axis.text.x = element_text(angle = 0, hjust = 1),
+        axis.text.y = element_text(angle = 0, hjust = 1)) +
+    # theme_minimal() +
+    theme(legend.position="none") +
+  xlab("") + ylab("")
+```
+
+
+## A network-level preview of table availability
+
+```{python, echo=FALSE}
+import pandas as pd
+table_sizes = pd.read_csv("../network_reports/05-23-2019/tablelist_aggregation.csv")
+
+num_orgs = len(table_sizes["organization"].drop_duplicates())
+    
+table_sizes["count"] = table_sizes["loaded"].apply(lambda x: 1 if x else 0)
+table_sizes = table_sizes[["TabNam", "count"]]
+
+table_counts = pd.DataFrame(table_sizes.groupby(["TabNam"])["count"].sum()).reset_index()
+
+table_counts.columns = ["TabNam", "Total"]
+table_counts["size"] =1
+table_counts["freq"] = table_counts["Total"]/float(num_orgs)
+```
+
+
+```{r, echo=FALSE, warning = FALSE, fig.align='center', fig.width= 10, fig.height= 5, dpi= 200, fig.align='center'}
+
+  treemap(py$table_counts,
+        index = "TabNam",
+        vSize = "size",
+        vColor="freq",
+        type="value",
+        title = "",
+        title.legend = "Table availability across network",
+        border.col = "white",
+        position.legend = "bottom",
+        range = c(0,1)
+        )
+```
+
+
+## Network-wide missingness in available tables -- calculated from *highly* or *extremely* important columns. 
+```{python, echo=FALSE}
+import pandas as pd
+DQ = pd.read_csv("../network_reports/05-23-2019/missingness_aggregation.csv")
+DQ = DQ[(DQ["DQLVL"]=="Yes") | (DQ["DQLVL"] == "H")]
+DQ["numb"] = 1
+DQ_agg1 = DQ.groupby(["TabNam", "ORGANIZATION"]).agg({
+    'Rows': 'mean',
+    'numb': 'sum',
+    'MS1_FREQ': 'sum',
+    'MS2_FREQ': 'sum'})
+
+DQ_agg1["Rows"] = DQ_agg1["Rows"] * DQ_agg1["numb"]
+DQ_agg1["MSs_PERC"] = ((DQ_agg1["MS1_FREQ"] + DQ_agg1["MS2_FREQ"])/DQ_agg1["Rows"])*100
+
+DQ_agg1.fillna(0.0, inplace=True)
+DQ_agg1["perc"] = DQ_agg1["MSs_PERC"].apply(lambda x: f"{round(x, 2)}%")
+DQ_agg1.drop("numb", inplace=True, axis=1)
+DQ_agg1.reset_index(inplace=True)
+
+
+DQ_agg2 = DQ_agg1.groupby("TabNam").agg({
+    "Rows": 'sum',
+    'MS1_FREQ': 'sum',
+    'MS2_FREQ': 'sum'
+})
+
+DQ_agg2.reset_index(inplace=True)
+DQ_agg2["MSs_PERC"] = ((DQ_agg2["MS1_FREQ"] + DQ_agg2["MS2_FREQ"])/DQ_agg2["Rows"])*100
+DQ_agg2.fillna(0.0, inplace=True)
+DQ_agg2["perc"] = DQ_agg2["MSs_PERC"].apply(lambda x: f"{round(x, 2)}%")
+```
+
+```{r, echo=FALSE, warning = FALSE, fig.align='center', fig.width= 20, fig.height= 10, dpi= 300, fig.align='center'}
+
+ggplot(py$DQ_agg2, aes(x=MSs_PERC,y=reorder(TabNam,-MSs_PERC),label = perc)) +
+geom_point(aes(fill = MSs_PERC),shape = 21, colour = "black",  size = 8, stroke = 3, alpha = 0.9) +
+geom_point(data=py$DQ_agg1, aes(x=MSs_PERC,y=reorder(TabNam,-MSs_PERC)),
+            shape = 21, colour = "black",  size = 4, stroke = 3, alpha = 0.3) +
+geom_text(vjust = 3, hjust = .5, nudge_y = 0, size = 4)+
+
+scale_fill_gradient2(limits=c(0, 1),low="#FFFAF0", high="#EE2C2C", guide=F,na.value="white")+
+# theme_grey(base_size = base_size) +
+labs(x = "", y = "") +
+scale_x_continuous(limits = c(0, 1)) +
+theme_minimal() +
+theme(panel.grid.major.y = element_line(color = "gray",size = 2.5),
+      panel.grid.major.x = element_line(colour = "black", linetype = "dotted"),
+      axis.text.y=element_text(size=20, face="bold"))
+
+```
+
+## Column-level state of missingness across the network
+```{python, echo=FALSE}
+import pandas as pd
+DQ = pd.read_csv("../network_reports/05-23-2019/missingness_aggregation.csv")
+#DQ = DQ[(DQ["DQLVL"]=="Yes") | (DQ["DQLVL"] == "H")]
+
+DQ_agg1 = DQ.groupby(["TabNam", "ColNam"]).agg({
+    'Rows': 'mean',
+    'UNIQUE_FREQ': 'sum',
+    'MS1_FREQ': 'sum',
+    'MS2_FREQ': 'sum'})
+
+DQ_agg1["MSs_PERC"] = round(((DQ_agg1["MS1_FREQ"] + DQ_agg1["MS2_FREQ"])/DQ_agg1["Rows"])*100, 2)
+DQ_agg1["round"] = 1
+DQ_agg1.fillna(0.0, inplace=True)
+DQ_agg1["perc"] = DQ_agg1["MSs_PERC"].apply(lambda x: f"{round(x*100, 2)}%")
+DQ_agg1.reset_index(inplace=True)
+```
+
+```{r, echo=FALSE, warning = FALSE, fig.align='center', fig.width= 20, fig.height= 70, dpi= 300, fig.align='center'}
+ggplot(py$DQ_agg1, aes(x=MSs_PERC,y=reorder(ColNam,-MSs_PERC),label = perc)) +
+  geom_point(data=py$DQ_agg1, aes(x=MSs_PERC,y=reorder(ColNam,-MSs_PERC)),
+             shape = 73, colour = "black",  size = 6, alpha = 0.3) +
+  geom_point(aes(color = MSs_PERC),shape = 73, size = 18,stroke=1, alpha = 1) +
+  geom_text(vjust = 0.5, hjust = -0.2, nudge_y = 0, size = 4)+
+  geom_label(aes(x = 1.1, label = TabNam), nudge_y = 0, size = 4)+
+  scale_colour_gradient(limits=c(0, 1),low="white", high="#EE2C2C", guide=F,na.value="white", space="Lab")+
+  labs(x = "", y = "") +
+  scale_x_continuous(limits = c(0, 1.1)) +
+  # theme_minimal() +
+  theme(panel.grid.major.y = element_line(color = "white",size = 2.5),
+        panel.grid.major.x = element_line(colour = "black", linetype = "dotted"),
+        axis.text.y=element_text(size=20, face="bold")) +
+      theme(legend.position="none") 
+```
+*This is ARCH Vue report*
+**Vue is an add-on for DQe-c version 3.2**
+
+**This Vue report was generated for the University of Washington on `r Sys.Date()`.**

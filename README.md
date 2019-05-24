@@ -80,7 +80,7 @@ python DQe-c.py -c /path/to/config_other.json
 # Module Workflow
 The current version of DQe-c is organized in a modular workflow that centers around the Query.py module which keeps track of the tests' output and database connection details.
 ## Modular high level workflow
-![workflow](images/DQe-c-v2_workflow_two.png)
+![workflow](images/DQe-c-v2_workflow_latest.png)
 
 ## Module descriptions
 ### config.json
@@ -131,3 +131,71 @@ In order to add a new test, add a new curly bracket section to the list and incl
 5. <strong>concepts:</strong> This is a list of the possible concept_ids or values of the clinical concept that will be looked for in the column above. If this field is labeled "false", the indicator test will just check for NULLs and nonsense values, counting the presence of a string or integer as a positive finding in the respective patient. 
 
 Adding a new block will automatically incorporate those variables as a test. The results of the test will be added to the file report and visualized in the dashboard.
+
+## Summary Reports
+The reports from the different modules written to the file reports/organization/date_of_report/*. As more reports are generated, a new folder will be created in the organization folder named for the date the script was run.
+```
+reports
+    organization_1
+        01-08-2019
+        04-19-2019
+            tablelist.csv
+            missingness.csv
+            indicators.csv
+            orphan.csv
+    organization_2
+        12-01-2018
+        03-31-2019
+```
+
+## Visualization Dashboards
+DQe-c-v2 comes with two visualization dashboard options: Site-Level View and the Network View (beta testing). However, since the reports are written to csv files, you can use your favorite visualization tool if you don't like the available options.
+
+Both of the dashboards use R markdown, so your system will require:
+```
+>= R version 3.3.1
+```
+
+### Site-Level Dashboard
+The site level dashboard contains a collection of visual summaries of the data quality reports. Tests like size of database tables, missing tables, missing values, and orphan keys are visualized.
+
+Here is an example of the [site-level dashboard](https://trberg.github.io/DQe-c/)
+
+### Network Dashboard (*under development*)
+The network dashboard combines all the reports from different organizations into a single summary dashboard.
+
+The network reports are first generated and saved to:
+```
+network_reports
+    date_of_report
+        missingness_aggregation.csv
+        orphan_aggregation.csv
+        tablelist_aggregation.csv
+```
+
+### Command Line Options
+When running DQe-c-v2, there a couple options when handling visualizations.
+```
+optional arguments:
+  -v 
+Options for creating the visualization dashboards. (default: site)            
+Options include:            
+        site - create dashboard for just this site            
+        site-only - Only creates the site dashboard without running the modules            
+        network - generate the dashboard to compare data quality tests from all the sites            
+        network-only - generate the network view dashboard without running any modules            
+        all - create both dashboards for site and network view            
+        none - runs the modules without generating any visualizations
+```
+Example 1 - the script would run the modules as well as generate the site-level visualization for site-1.
+```
+python DQe-c-v2 -c config/config_site-1 -v site
+```
+Example 2 - the script would use the latest report file from the organization in the config file to generate the visualization dashboard without running any of the tests.
+```
+python DQe-c-v2 -c config/config_org2 -v site-only
+```
+Example 3 - the script would only run the tests and generate reports and would not run any of the visualization scripts.
+```
+python DQe-c-v2 -c config/config_org2 -v none
+```

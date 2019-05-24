@@ -1,0 +1,86 @@
+[
+    {
+        "indicator name": "systolic blood pressure",
+        "table": "VITAL", 
+        "col": "systolic", 
+        "label": "Systolic BP",
+        "concepts": false
+    },
+    {
+        "indicator name": "diastolic blood pressure",
+        "table": "VITAL", 
+        "col": "diastolic", 
+        "label": "Diastolic BP",
+        "concepts": false
+    },
+    {
+        "indicator name": "heart rate",
+        "table": "MEASUREMENT", 
+        "col": "measurement_concept_id", 
+        "label": "HR",
+        "concepts": [4239408]
+    },
+    {
+        "indicator name": "height",
+        "table": "VITAL", 
+        "col": "ht", 
+        "label": "Height",
+        "concepts": false
+    },
+    {
+        "indicator name": "weight",
+        "table": "VITAL", 
+        "col": "wt", 
+        "label": "Weight",
+        "concepts": false
+    },
+    {
+        "indicator name": "smoking status",
+        "table": "VITAL", 
+        "col": "smoking", 
+        "label": "Smoking Status",
+        "concepts": false
+    },
+    {
+        "indicator name": "gender",
+        "table": "DEMOGRAPHIC",
+        "col": "sex",
+        "label": "Gender",
+        "concepts": ["M","F"]
+    },
+    {
+        "indicator name": "ethnicity",
+        "table": "DEMOGRAPHIC",
+        "col": "hispanic",
+        "label": "Ethnicity",
+        "concepts": ["Y"]
+    },
+    {
+        "indicator name": "race",
+        "table": "DEMOGRAPHIC",
+        "col": "race",
+        "label": "Race",
+        "concepts": ["05","03","07","02","01","04","06","OT"]
+    },
+    {
+        "indicator name": "Medications",
+        "table": "PRESCRIBING",
+        "col": "prescribingid",
+        "label": "Medication",
+        "concepts": false
+    },
+    {
+        "indicator name": "Conditions",
+        "table": "DIAGNOSIS",
+        "col": "dx",
+        "label": "Condition",
+        "concepts": false
+    },
+    {
+        "indicator name": "Visit",
+        "table": "ENCOUNTER",
+        "col": "enc_type",
+        "label": "Visit",
+        "concepts": false
+    }
+]
