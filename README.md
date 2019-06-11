@@ -15,11 +15,12 @@ cd DQe-c-v2
 ```
 Install the dependency libraries (conda is recommended, pip has issues installing cx_oracle)
 ```
-pip install -r requirements.txt
+conda config --add channels conda-forge
+conda install --file requirements.txt
 ```
 OR
 ```
-conda install --file requirements.txt
+pip install -r requirements.txt
 ```
 
 # Configuration and Using the Tool

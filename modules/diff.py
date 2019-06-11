@@ -37,7 +37,6 @@ class Diff:
         ## If none of the tables appear to be loaded, the program quits.
         if len(tablelist[tablelist["loaded"]]) == 0:
             print ("This database seems to be empty. See the tablelist.csv report for more information.")
-            exit()
 
         #tablelist.to_csv("reports/tablelist.csv")
 
@@ -128,7 +127,7 @@ class Diff:
                     cols.table_catalog='{self.query.database}' AND
                     cols.table_name = tabs.table_name
                     ;"""
-
+        
         output = pandas.read_sql(query, con=self.query.conn)
         output.columns = ["TabNam", "ColNam", "Rows", "TotalSizeKB"]
 
