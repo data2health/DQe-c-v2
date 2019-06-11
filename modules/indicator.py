@@ -36,7 +36,7 @@ class Indicator:
                         cur_concepts = self.getChildConceptsOMOP(test["concepts"])
 
                     else:
-                        cur_concepts = test["concepts"]
+                        cur_concepts = ",".join([str(i) for i in test["concepts"]])
 
                     output = self.isPresent(table=test["table"], col=test["col"], group=test["label"], concepts=cur_concepts)
                 else:
