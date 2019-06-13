@@ -1,6 +1,6 @@
 """
-This code was developed by the University of Washington
-and funded by CD2H and ITHS
+This code was developed by investigators the University of Washington
+and funded by CD2H (U24TR002306) and ITHS (UL1 TR002319)
 """
 
 
@@ -9,8 +9,9 @@ from modules.missingness import Missingness
 from modules.indicator import Indicator
 from modules.query import Query
 from modules.diff import Diff
-from modules.vocabulary import Vocab
-from modules.network import Network
+#from modules.vocabulary import Vocab
+#from modules.network import Network
+#from modules.longitudinal import Longitudinal
 import pandas as pd
 import argparse
 from argparse import RawTextHelpFormatter
@@ -18,17 +19,22 @@ from argparse import RawTextHelpFormatter
 def main(config, vis):
 
     #-----------------------------------------
-    # Data Quality Modules
+    # Configuration Initiation
     #-----------------------------------------
 
     ## initiate database connection and tool configurations
     query = Query(config, vis)
+    print ("Database connection established")
 
     # if the -v option is site-only or network-only, the tool skips the modules
     if vis in ["site-only", "network-only"]:
         pass
     else:
-        
+
+        #-----------------------------------------
+        # Data Quality Modules
+        #-----------------------------------------
+
         ## Generates the reports/tablelist.csv file
         ## Filters the query.DQTBL object to include only tables that
         ## are present in the live database. 
@@ -53,12 +59,16 @@ def main(config, vis):
         print ("Indicators test has been run")
         
 
-        # ----- UNDER DEVELOPMENT ------
         # run the Vocabulary check tests
         # checks which vocabularies your terms are in
         #Vocab(query).vocabulary()
         #print ("Vocabulary test has been run")
-        #-------------------------------
+
+
+        # run the Longitunidal Data Characterization module
+        # checks visit counts over time in months and years
+        #Longitudinal(query).longitudinal()
+        #print ("Longitudinal module has been run")
 
 
         #----------------------
@@ -70,6 +80,13 @@ def main(config, vis):
     #-----------------------------------------
     # Visualization and Network Options
     #-----------------------------------------
+    
+    if vis in ["site", "site-only", "all"]:
+        # Generates site specific HTML report
+        query.generateHTMLReport()
+
+
+    
     if vis in ["network-only", "network", "all"]:
         # Builds the network aggregation reports
         Network(query).createAggregateReports()
@@ -77,12 +94,8 @@ def main(config, vis):
 
         # ----- UNDER DEVELOPMENT ------
         # Generates network view HTML report
-        # Network(query).generateNetworkHTMLReport()
+        Network(query).generateNetworkHTMLReport()
         #-------------------------------
-    
-    if vis in ["site", "site-only", "all"]:
-        # Generates site specific HTML report
-        query.generateHTMLReport()
 
 
 
