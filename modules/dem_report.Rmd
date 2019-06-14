@@ -1,0 +1,39 @@
+---
+title: "DQe-c Demographic Report"
+output: 
+  html_document: 
+    highlight: tango
+
+---
+
+## Load and Test Details
+
+This DQec report is generated from testing completeness in `r CDM` data from `r ORGANIZATION` on `r Sys.Date()`. 
+
+### Table 1. List and Status of Common Data Model (CDM) -- here, `r CDM` -- Tables in this load
+The table below provides a list of CDM tables provided (and not provided) in the data load.
+
+The source data this table and the following graphics in this section are being generated from is reports/`r ORGANIZATION`/`r Sys.Date()`/tablelist.csv
+
+```{r, echo=FALSE, fig.align='center', fig.width= 10}
+library(ggplot2)
+demog <- read.csv("/Users/mehadi/work/d2health/DQe-c-v2/CDMs/demographic.csv")
+cols=colnames(demog)
+temp=c()
+for (ind in c(1:length(cols))){temp=c(temp,demog[[cols[ind]]])}
+demog=data.frame(xval=colnames(demog),yval=temp)
+
+gender=demog[2:3,]
+ggplot(data = gender, aes(xval,yval,fill=factor(xval)))
+  + geom_bar(stat="identity")
+  + xlab("Gender")
+  + ylab("Total Count")
+  + labs(fill="Gender")
+
+ethnicity=demog[4:5,]
+ggplot(data = ethnicity, aes(xval,yval,fill=factor(xval)))
+  + geom_bar(stat="identity")
+  + xlab("Ethnicity")
+  + ylab("Total Count")
+  + labs(fill="Ethnicity")
+```

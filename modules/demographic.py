@@ -69,21 +69,25 @@ class Demographic:
                 "American_Indian_or_Alaska_Native" : 8657
             }
 
-            gender_df = self.gender(id="person_id",
-                                    table="PERSON",
+            id = "person_id"
+            table = "PERSON"
+
+            denom = self.denominator(id, table)
+            gender_df = self.gender(id=id,
+                                    table=table,
                                     col="gender_concept_id",
                                     male=male,
                                     female=female)
-            ethnicity_df = self.ethnicity(id="person_id",
-                                          table="PERSON",
+            ethnicity_df = self.ethnicity(id=id,
+                                          table=table,
                                           col="ethnicity_concept_id",
                                           hispanic_latino=hispanic_latino,
                                           not_hispanic_latino=not_hispanic_latino)
-            race_df = self.race(id="person_id",
-                                table="PERSON",
+            race_df = self.race(id=id,
+                                table=table,
                                 col="race_concept_id",
                                 race_dict=race_dict)
-        
+            
         elif self.query.CDM.startswith("PCORNET"):
             male = "M"
             female = "F"
@@ -98,29 +102,57 @@ class Demographic:
                 "Native_Hawaiian_or_Other_Pacific_Islander" : "04",
                 "White" : "05",
                 "Multiple_Race" : "06",
-                "Refuse_to_answer" : "07",
+                "Refuse_to_Answer" : "07",
                 "Other" : "OT"
             }
             
-            gender_df = self.gender(id="PATID",
-                                    table="DEMOGRAPHIC",
+            id = "PATID"
+            table = "DEMOGRAPHIC"
+
+            denom = self.denominator(id, table)
+            gender_df = self.gender(id=id,
+                                    table=table,
                                     col="sex",
                                     male=male,
                                     female=female)
-            ethnicity_df = self.ethnicity(id="PATID",
-                                          table="DEMOGRAPHIC",
+            ethnicity_df = self.ethnicity(id=id,
+                                          table=table,
                                           col="hispanic",
                                           hispanic_latino=hispanic_latino,
                                           not_hispanic_latino=not_hispanic_latino)
-            race_df = self.race(id="PATID",
-                                table="DEMOGRAPHIC",
+            race_df = self.race(id=id,
+                                table=table,
                                 col="race",
                                 race_dict=race_dict)
         
         else:
             raise Exception(f"No config.json file for CDM {self.query.CDM}")
 
+        organization = self.query.organization
+        gender_perc_df = pandas.DataFrame({
+                                        "Male":[str(round((gender_df["Male"]/denom)*100,2))+"%"],
+                                        "Female": [str(round((gender_df["Female"]/denom)*100,2))+"%"]
+        })
+        ethnicity_perc_df = pandas.DataFrame({"Hispanic_or_Latino": [str(round((ethnicity_df["Hispanic_or_Latino"]/denom)*100,2))+"%"],
+                                              "Not_Hispanic_or_Latino": [str(round((ethnicity_df["Not_Hispanic_or_Latino"]/denom)*100,2))+"%"]
+        })
+        race_perc_df = pandas.DataFrame()
+        for key in race_dict:
+            race_perc_df[key] = [str(round((race_df[key]/denom)*100,2))+"%"]
+
+        gender_df = gender_df.append(gender_perc_df)
+        ethnicity_df = ethnicity_df.append(ethnicity_perc_df)
+        race_df = race_df.append(race_perc_df)
+
+
         return # csv file demographic.csv
+
+    def denominator(self, id: str, table: str) -> int:
+        denominatorQuery: str = f"""
+                            SELECT COUNT(DISTINCT({id})) as denom
+                            FROM {self.query.prefix}{table} """
+
+        return pandas.read_sql(denominatorQuery, con=self.query.conn)["denom"]
 
     def gender(self, id: str, table: str, col: str, male=None, female=None) -> object:
         male_query: str = f"""
@@ -132,7 +164,7 @@ class Demographic:
                             SELECT COUNT(DISTINCT({id})) as female_count
                             FROM {self.query.prefix}{table}
                             WHERE {col} == {female} """
-        
+
         return pandas.DataFrame({
             "Male": [pandas.read_sql(male_query, con=self.query.conn)["male_count"]],
             "Female": [pandas.read_sql(female_query, con=self.query.conn)["female_count"]]
