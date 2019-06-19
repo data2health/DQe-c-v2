@@ -17,6 +17,7 @@ The source data this table and the following graphics in this section are being 
 
 ```{r, echo=FALSE, fig.align='center', fig.width= 10}
 library(ggplot2)
+library(tidyverse)
 demog <- read.csv("/Users/mehadi/work/d2health/DQe-c-v2/CDMs/demographic.csv")
 cols=colnames(demog)
 temp=c()
@@ -24,16 +25,25 @@ for (ind in c(1:length(cols))){temp=c(temp,demog[[cols[ind]]])}
 demog=data.frame(xval=colnames(demog),yval=temp)
 
 gender=demog[2:3,]
-ggplot(data = gender, aes(xval,yval,fill=factor(xval)))
-  + geom_bar(stat="identity")
+ggplot(data=gender, aes(xval,yval,fill=factor(xval)))
+  + geom_bar(stat="identity", width=0.4)
   + xlab("Gender")
   + ylab("Total Count")
   + labs(fill="Gender")
+  + coord_flip()
 
 ethnicity=demog[4:5,]
-ggplot(data = ethnicity, aes(xval,yval,fill=factor(xval)))
-  + geom_bar(stat="identity")
+ggplot(data=ethnicity, aes(xval,yval,fill=factor(xval)))
+  + geom_bar(stat="identity", width=0.4)
   + xlab("Ethnicity")
   + ylab("Total Count")
   + labs(fill="Ethnicity")
+  + coord_flip()
+
+race=demog[6:nrow(demog),]
+race %>% mutate(xval=fct_reorder(xval, desc(yval))) %>% ggplot(aes(xval,yval,fill=factor(xval)))
+  + geom_bar(stat="identity", width=0.4)
+  + xlab("Race")+ ylab("Total Count")
+  + labs(fill="Race")
+  + coord_flip()
 ```
