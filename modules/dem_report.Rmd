@@ -46,4 +46,6 @@ race %>% mutate(xval=fct_reorder(xval, desc(yval))) %>% ggplot(aes(xval,yval,fil
   + xlab("Race")+ ylab("Total Count")
   + labs(fill="Race")
   + coord_flip()
+
+ggplot(race, aes(x=xval,y=yval,size=seq(min(yval),max(yval),length.out=length(yval)),color=xval))+geom_point()
 ```
