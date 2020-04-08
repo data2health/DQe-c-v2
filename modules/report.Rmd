@@ -10,7 +10,7 @@ params:
 
 ```{r, echo=FALSE}
 library("reticulate")
-#use_python("/anaconda/bin", required = T)
+use_python("C:/users/iiw01/AppData/Local/r-miniconda/bin", required = T)
 config = params$config
 outputDir = params$outputDir
 ```
@@ -185,11 +185,14 @@ for folder in os.listdir(report_directory):
   if folder.startswith('.'):
     pass
   else:
-    data = pd.read_csv(report_directory + "/" + folder + "/missingness.csv")
-    data = data[data["cat"]!="vocabulary"]
-    data = data[data["primary"]]
-    data = data[["TabNam","ColNam", "UNIQUE_FREQ", "TEST_DATE"]]
-    prim_loads = prim_loads.append(data)
+    try:
+      data = pd.read_csv(report_directory + "/" + folder + "/missingness.csv")
+      data = data[data["cat"]!="vocabulary"]
+      data = data[data["primary"]]
+      data = data[["TabNam","ColNam", "UNIQUE_FREQ", "TEST_DATE"]]
+      prim_loads = prim_loads.append(data)
+    except FileNotFoundError:
+      pass
 ```
 
 ```{r, echo=FALSE, warning=FALSE,  message=FALSE, fig.align='center', fig.height= 10,  fig.width= 10}
@@ -295,3 +298,76 @@ ggplot(withouts, aes(x=MISSING_PERCENTAGE,y=reorder(GROUP,-MISSING_PERCENTAGE), 
           axis.text.y=element_text(size=20, face="bold"))
 ```
 
+## Test of Conformance in Vocabulary Standards
+
+### Figure 6. Vocabularys in Use by Clinical Table
+Figure 6 shows the percentage of all concepts in the clinical tables. The tests are derived from the tests/vocabulary.json files. 
+
+```{r, echo=FALSE, fig.align='center', fig.height= 5, fig.width= 10}
+vocabulary <- read.csv(paste(py$outputDir, "vocabulary.csv", sep=""))
+vocabulary_agg <- aggregate(vocabulary$percent, by=list(vocabulary=vocabulary$vocabulary, TabNam=vocabulary$TabNam), FUN=sum)
+  
+ggplot(vocabulary_agg, aes(x=TabNam, y=x, fill=vocabulary)) + 
+    geom_bar(stat="identity", width = 1) +
+    facet_wrap( ~ TabNam, scale="free_x", nrow = 1) +
+    #scale_fill_brewer(palette="Dark2") +
+    xlab("Table") +
+    ylab("Percent of Terms") +
+    theme(plot.title = element_text(family = "Trebuchet MS", color="#666666", face="bold", hjust=0),
+          axis.text.x = element_text(vjust = 1),
+          strip.text.x = element_text(angle = 90, face="bold")) +
+    theme(axis.text.x=element_blank())+    # theme(legend.position="none") + 
+    ggtitle('Ratio of vocabularys in use in the table')
+  
+```
+
+### Figure 7. Changes in Record Numbers across Time
+Figure 7 shows the number of records over time in the repository.
+
+```{r, echo=FALSE, warning=FALSE,  message=FALSE, fig.align='center', fig.height= 10,  fig.width= 10}
+if (FALSE) {
+  cur_year = strtoi(format(Sys.Date(), "%Y"))
+  min_year = cur_year - 30
+
+  distributions <- read.csv(paste(py$outputDir, "longitudinal.csv", sep=""))
+  distributions <- subset(distributions, YEAR <= cur_year & YEAR > min_year, select=c("YEAR", "MONTH", "LABEL", "COUNT"))
+
+  year_dist <- aggregate(distributions$COUNT, by=list(YEAR=distributions$YEAR, LABEL=distributions$LABEL), FUN=sum)
+
+  ggplot(year_dist, aes(x=YEAR, y=x, group=LABEL) ) + 
+    geom_line(aes(), alpha = 0.4,  size = 1, show.legend = FALSE) + 
+    stat_smooth(colour = "red",level=0.99) +
+    geom_point( alpha = 0.5, shape = 1, size = 6, colour = "#FF3333", stroke = 2, show.legend = FALSE) + 
+    geom_point( aes(col = YEAR), shape = 20, size = 8,   show.legend = T) + 
+    scale_x_continuous(breaks = round(seq(min(year_dist$YEAR), max(year_dist$YEAR), by = 2),1)) +
+    theme(plot.title = element_text(family = "Trebuchet MS", color="#666666", face="bold", hjust=0)) +
+    xlab("Year") + ylab("Record Counts") + 
+    facet_wrap(~LABEL, ncol = 1, strip.position = "bottom", scales = "fixed") +
+    theme(axis.text.x=element_text(colour="#666666", size = 12))
+}
+```
+
+### Figure 8. Changes in Monthly Record Numbers for the last two years
+Figure 8 shows the monthly number of records over time in the repository.
+
+```{r, echo=FALSE, warning=FALSE,  message=FALSE, fig.align='center', fig.height= 10,  fig.width= 10}
+if (FALSE) {
+  cur_year = strtoi(format(Sys.Date(), "%Y"))
+  prev_year = cur_year - 1
+
+  month_dist <- subset(distributions, YEAR == cur_year | YEAR == prev_year, select=c("YEAR", "MONTH", "LABEL", "COUNT"))
+  month_dist <- transform(month_dist, DATE=ISOdatetime(month_dist$YEAR, month_dist$MONTH, 1, 0, 0, 0))
+
+
+  ggplot(month_dist, aes(x=DATE, y=COUNT, group=LABEL) ) + 
+    geom_line(aes(), alpha = 0.4,  size = 1, show.legend = FALSE) + 
+    stat_smooth(colour = "red",level=0.99) +
+    geom_point( alpha = 0.5, shape = 1, size = 6, colour = "#FF3333", stroke = 2, show.legend = FALSE) + 
+    geom_point( aes(col = DATE), shape = 20, size = 8,   show.legend = T) +
+    ## scale_x_continuous(breaks = (pretty_breaks()month_dist$DATE)) +
+    theme(plot.title = element_text(family = "Trebuchet MS", color="#666666", face="bold", hjust=0)) +
+    xlab(paste("Monthly Records")) + ylab("Record Counts") + 
+    facet_wrap(~LABEL, ncol = 1, strip.position = "bottom", scales = "fixed") +
+    theme(axis.text.x=element_text(colour="#666666", size = 15))
+}
+```
