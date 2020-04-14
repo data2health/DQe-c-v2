@@ -69,13 +69,13 @@ class Orphan:
         external =  row["TabNam_external"]
         col      =  row["ColNam"]
         query = f"""
-            SELECT COUNT(DISTINCT({col}))
+            SELECT COUNT(DISTINCT({col})) as count
             FROM {self.query.prefix}{external} as ext
             WHERE NOT EXISTS 
             (
                 SELECT {col}
                 FROM {self.query.prefix}{primary} as prim
-                WHERE prim.{col} = ext.{col}
+                WHERE CAST(prim.{col} AS VARCHAR) = CAST(ext.{col} AS VARCHAR)
             );"""
 
         CountOutResults = int(pandas.read_sql(query, con=self.query.conn)["count"])
@@ -88,11 +88,15 @@ class Orphan:
         col      =  row["ColNam"]
 
         query = f"""
-            SELECT COUNT(DISTINCT(ext.{col}))
-            FROM {self.query.prefix}{primary} prim LEFT JOIN {self.query.prefix}{external} ext ON prim.{col}=ext.{col}
+            SELECT COUNT(DISTINCT(ext.{col})) as count
+            FROM 
+                {self.query.prefix}{primary} prim 
+                    LEFT JOIN 
+                {self.query.prefix}{external} ext 
+                    ON CAST(prim.{col} AS VARCHAR)=CAST(ext.{col} AS VARCHAR)
         """
-
-        CountInResults = int(pandas.read_sql(query, con=self.query.conn)["count"])
+        Qresults = pandas.read_sql(query, con=self.query.conn)
+        CountInResults = int(Qresults["count"])
 
         return CountInResults
 

@@ -7,109 +7,74 @@ class Indicator:
     def __init__(self, query: object):
         self.query = query
 
+
     def get(self):
-        if self.query.CDM == "PCORNET3" or self.query.CDM == "PCORNET31":
-            withoutGenderPCORI      = self.query.withoutdemPCORI(col = "sex", group = "Gender")
-            withoutRacePCORI        = self.query.withoutdemPCORI(col = "race", group = "Race")
-            withoutEthnicityPCORI   = self.query.withoutdemPCORI(col = "hispanic", group = "Ethnicity")
-
-            withoutMedicationPCORI  = self.query.withoutPCORI(table = "PRESCRIBING", col = "prescribingid", group = "Medication")
-            withoutDiagnosisPCORI   = self.query.withoutPCORI(table = "DIAGNOSIS", col = "dx", group = "Diagnosis")
-            withoutEncounterPCORI   = self.query.withoutPCORI(table = "ENCOUNTER", col = "enc_type", group = "Encounter")
-            withoutWeightPCORI      = self.query.withoutPCORI(table = "VITAL", col = "wt", group = "Weight")
-            withoutHeightPCORI      = self.query.withoutPCORI(table = "VITAL", col = "ht", group = "Height")
-            withoutBpSysPCORI       = self.query.withoutPCORI(table = "VITAL", col = "systolic", group = "BP")
-            withoutBpDiasPCORI      = self.query.withoutPCORI(table = "VITAL", col = "diastolic", group = "BP")
-            withoutSmokingPCORI     = self.query.withoutPCORI(table = "VITAL", col = "smoking", group = "Smoking")
-
-            indicators = pandas.concat([withoutGenderPCORI, withoutRacePCORI, withoutEthnicityPCORI, withoutMedicationPCORI,
-                                    withoutDiagnosisPCORI, withoutEncounterPCORI, withoutWeightPCORI, withoutHeightPCORI,
-                                    withoutBpSysPCORI, withoutBpDiasPCORI, withoutSmokingPCORI], ignore_index=True)
-
-
-        elif self.query.CDM == "OMOPV5_0" or self.query.CDM == "OMOPV5_2" or self.query.CDM == "OMOPV5_3":
             
-            indicators_output = []
+        indicators_output = []
 
-            indicator_tests = json.load(open("tests/indicators.json"))
 
-            for test in indicator_tests:
-                try:
-                    if test["concepts"]:
-                        output = self.isPresentOMOP(table=test["table"], col=test["col"], group=test["label"], concepts=self.getChildConceptsOMOP(test["concepts"]))
+        ## Pull the CDM specific indicator test
+        if self.query.CDM.startswith("OMOP"):
+            indicator_tests = json.load(open("tests/indicators_omop.json"))
+
+        elif self.query.CDM.startswith("PCORNET"):
+            indicator_tests = json.load(open("tests/indicators_pcornet.json"))
+
+        else:
+            raise Exception(f"No indicator.json file for CDM {self.query.CDM}")
+
+        
+        ## Iterate through each of the test modules to calculate the percentage of patients
+        ## who have at least one records of the indicator
+        for test in indicator_tests:
+            try:
+                if test["concepts"]:
+
+                    ## Since OMOP has the capability to query vocabularies, we got and search all possible
+                    ## child terms of our concepts in the list
+                    if self.query.CDM.startswith("OMOP"):
+                        cur_concepts = self.getChildConceptsOMOP(test["concepts"])
+
                     else:
-                        output = self.isPresentOMOP(table=test["table"], col=test["col"], group=test["label"])
+                        cur_concepts = ",".join([str(i) for i in test["concepts"]])
 
-                    indicators_output.append(output)
+                    output = self.isPresent(table=test["table"], col=test["col"], group=test["label"], concepts=cur_concepts)
+                else:
+                    output = self.isPresent(table=test["table"], col=test["col"], group=test["label"])
 
-                except Exception as e:
-                    output = "Error"
+                indicators_output.append(output)
 
-            indicators = pandas.concat(indicators_output, ignore_index=True)
+            except Exception as e:
+                output = "Error"
+                
+
+        indicators = pandas.concat(indicators_output, ignore_index=True)
 
         self.query.outputReport(indicators, "indicators.csv")
 
 
-    def withoutdemPCORI(self, col: str, group: str) -> object:
-        exclude: Dict[str,List[str]] = {
-                "Gender": ["M","F"],
-                "Race": ["05","03","07","02","01","04","06","OT"],
-                "Ethnicity": ["Y"]
-            }
-        
-        if self.query.DBMS == "sql server" or self.query.DBMS == "oracle":
-            denominatorQuery: str = f"""
-                                    SELECT COUNT(DISTINCT(PATID))
-                                    FROM DEMOGRAPHIC
-                                    WHERE BIRTH_DATE > 1900-01-01 AND BIRTH_DATE  < 2014-01-01 """
-            notinQuery: str = f"""
-                            SELECT COUNT(PATID)
-                            FROM  (
-                                    SELECT *
-                                    FROM {self.query.prefix}DEMOGRAPHIC
-                                    WHERE BIRTH_DATE > 1900-01-01 AND BIRTH_DATE  < 2014-01-01
-                                    ) dd
-                            WHERE toupper({col}) NOT IN {exclude[group]} """
-            whattheyhaveQuery: str = f"""
-                                    SELECT DISTINCT(toupper({col}))
-                                    FROM   (
-                                            SELECT *
-                                            FROM {self.query.prefix}DEMOGRAPHIC
-                                            WHERE BIRTH_DATE > 1900-01-01 AND BIRTH_DATE  < 2014-01-01
-                                            ) dd
-                                    WHERE toupper({col}) NOT IN {exclude[group]} """
-        
-        cursor = self.query.conn.cursor()
-        denominator = cursor.execute(denominatorQuery)
-        notin = cursor.execute(notinQuery)
-        whattheyhave = cursor.execute(whattheyhaveQuery)
-        self.query.conn.close()
-
-        d1: int = round((notin/denominator)*100,4)
-        
-        return pandas.DataFrame({
-                                "GROUP": [group],
-                                "MISSING_PERCENTAGE": [d1],
-                                "MISSING_POPULATION": [notin],
-                                "DENOMINATOR": [denominator],
-                                "PERCENTAGE": [str(round(d1,2))+"%"],
-                                "TEST_DATE": [datetime.datetime.today().strftime('%m-%d-%Y')],
-                                "ORGANIZATION": [self.query.organization],
-                                "CDM": [self.query.CDM]
-                                })
-
     
 
-    def isPresentOMOP(self, table: str, col: str, group: str, concepts = False) -> object:
+    def isPresent(self, table: str, col: str, group: str, concepts = False) -> object:
         
+        if self.query.CDM.startswith("OMOP"):
+            patient_id = "person_id"
+            patient_table = "PERSON"
+
+        elif self.query.CDM.startswith("PCORNET"):
+            patient_id = "PATID"
+            patient_table = "DEMOGRAPHIC"
+        else:
+            raise Exception(f"CDM {self.query.CDM} not configured in indicator")
+
         denominatorQuery: str = f"""
-                            SELECT COUNT(DISTINCT(person_id))
-                            FROM {self.query.prefix}PERSON """
+                            SELECT COUNT(DISTINCT({patient_id})) as count
+                            FROM {self.query.prefix}{patient_table} """
 
         ## If a concept list is present, will check that the column value is in that list
         if concepts:
             pats_with_oneQuery: str = f"""
-                                SELECT COUNT(DISTINCT(person_id)) 
+                                SELECT COUNT(DISTINCT({patient_id})) as count
                                 FROM {self.query.prefix}{table} 
                                 WHERE {col} IN ({concepts}) """
         
@@ -120,7 +85,7 @@ class Indicator:
             if self.query.DBMS == "oracle":
                 
                 pats_with_oneQuery: str = f"""
-                                            SELECT COUNT(DISTINCT(person_id))
+                                            SELECT COUNT(UNIQUE({patient_id})) as count
                                             FROM {self.query.prefix}{table} 
                                             WHERE {col} IS NOT NULL AND TO_CHAR({col}) NOT IN ({exclude}) """
 
@@ -128,7 +93,7 @@ class Indicator:
             elif self.query.DBMS in ["sql server", "redshift", "postgresql"]:
                 
                 pats_with_oneQuery: str = f"""
-                                            SELECT COUNT(DISTINCT(person_id)) 
+                                            SELECT COUNT(DISTINCT({patient_id})) as count
                                             FROM {self.query.prefix}{table}
                                             WHERE {col} IS NOT NULL AND CAST({col} AS CHAR(54)) NOT IN ({exclude}) """
 
@@ -157,6 +122,8 @@ class Indicator:
                                 })
     
     
+    ## This function is designed to use the OMOP vocabulary tables to 
+    # search for child terms to the input list of concepts
     def getChildConceptsOMOP(self, conceptId):
         childConceptsQuery: str = f"""
                                 SELECT descendant_concept_id
@@ -165,17 +132,3 @@ class Indicator:
 
         childConcepts = ",".join([str(i) for i in list(pandas.read_sql(childConceptsQuery, con=self.query.conn)["descendant_concept_id"])])
         return(childConcepts)
-
-
-
-    def missing_variable(self, group, concept = "", ):
-        return pandas.DataFrame({
-            "GROUP": [group if concept == "" else concept],
-            "MISSING_PERCENTAGE": [100],
-            "MISSING_POPULATION": [0],
-            "DENOMINATOR": [0],
-            "PERCENTAGE": [str(round(0.00,2))+"%"],
-            "TEST_DATE": [datetime.datetime.today().strftime('%m-%d-%Y')],
-            "ORGANIZATION": [self.query.organization],
-            "CDM": [self.query.CDM]
-            })

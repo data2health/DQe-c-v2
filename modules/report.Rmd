@@ -1,5 +1,5 @@
 ---
-title: "DQe-c Report"
+title: "DQe-c-v2 Report"
 output: 
   html_document: 
     highlight: tango
@@ -55,6 +55,7 @@ dato$TotalSizeKB <- ifelse(is.null(dato$TotalSizeKB) | is.na(dato$TotalSizeKB), 
 dato$TotalSizeGB <- round(as.numeric(dato$TotalSizeKB)/1000000,4)
 dato$Rows <- ifelse(is.null(dato$Rows) | is.na(dato$Rows), 0, dato$Rows)
 dato$status <- ifelse((dato$loaded == "True"), "Table available", "Table not available")
+dato$status[(dato$Rows == 0) & (dato$loaded == "True")] <- "Table empty"
 dato$vSize <- rep(1,nrow(dato))
 
 #sub_dato <- subset(dato,primary=="TRUE")
@@ -167,7 +168,6 @@ The table below provides results of completeness test at the value/cell level.
 Data for this table is generated from `r paste("DQ_Master_Table_",CDM,"_",ORGANIZATION,"_",as.character(format(Sys.Date(),"%d-%m-%Y")),".csv", sep="")` saved under report directory.
 
 ```{r, echo=FALSE}
-#DQTBL <- dato
 DQTBL <- read.csv(paste(py$outputDir, "missingness.csv", sep=""))
 datatable(DQTBL[,c("TabNam","ColNam","DQLVL", "Rows", "UNIQUE_FREQ","MS1_FREQ","MS2_FREQ","MSs_PERCENTAGE", "TEST_DATE")], options = list(pageLength = 10), filter = 'bottom')
 ```
@@ -187,6 +187,7 @@ for folder in os.listdir(report_directory):
     pass
   else:
     data = pd.read_csv(report_directory + "/" + folder + "/missingness.csv")
+    data = data[data["cat"]!="vocabulary"]
     data = data[data["primary"]]
     data = data[["TabNam","ColNam", "UNIQUE_FREQ", "TEST_DATE"]]
     prim_loads = prim_loads.append(data)
@@ -200,7 +201,7 @@ ggplot(py$prim_loads, aes(x=reorder(TEST_DATE,TEST_DATE), y=UNIQUE_FREQ, group =
   geom_point( aes(col = TEST_DATE), shape = 20, size = 8,   show.legend = T) + 
   theme(plot.title = element_text(family = "Trebuchet MS", color="#666666", face="bold", hjust=0)) +
   xlab("Load") + ylab("Unique Counts") + 
-  facet_wrap(~TabNam, ncol = 3, switch = "x", scales = "free") +
+  facet_wrap(~TabNam, ncol = 3, strip.position = "bottom", scales = "free") +
   theme(axis.text.x=element_text(colour="white", size = 0.1))
 ```
 
@@ -288,9 +289,46 @@ ggplot(withouts, aes(x=MISSING_PERCENTAGE,y=reorder(GROUP,-MISSING_PERCENTAGE), 
     geom_text(vjust = -0.5, hjust = -.38, nudge_y = 0, size = 4)+
     scale_fill_gradient(limits=c(0, 100),low="#FFFAF0", high="#EE2C2C", guide=F,na.value="white")+
     labs(x = "", y = "") +
-    scale_x_continuous(limits = c(0, 100)) + 
+    scale_x_continuous(limits = c(0, 100)) +
     theme_minimal() +
     theme(panel.grid.major.y = element_line(color = "gray",size = 2.5),
           panel.grid.major.x = element_line(colour = "black", linetype = "dotted"),
           axis.text.y=element_text(size=20, face="bold"))
+```
+
+## Demographics visualization
+
+```{r, echo=FALSE, fig.align='center', fig.width= 10}
+library(ggplot2)
+library(tidyverse)
+demog <- read.csv("path/to/demographic.csv")
+cols=colnames(demog)
+temp=c()
+for (ind in c(1:length(cols))){temp=c(temp,demog[[cols[ind]]])}
+demog=data.frame(xval=colnames(demog),yval=temp)
+
+gender=demog[2:3,]
+ggplot(data=gender, aes(xval,yval,fill=factor(xval)))
+  + geom_bar(stat="identity", width=0.4)
+  + xlab("Gender")
+  + ylab("Total Count")
+  + labs(fill="Gender")
+  + coord_flip()
+
+ethnicity=demog[4:5,]
+ggplot(data=ethnicity, aes(xval,yval,fill=factor(xval)))
+  + geom_bar(stat="identity", width=0.4)
+  + xlab("Ethnicity")
+  + ylab("Total Count")
+  + labs(fill="Ethnicity")
+  + coord_flip()
+
+race=demog[6:nrow(demog),]
+race %>% mutate(xval=fct_reorder(xval, desc(yval))) %>% ggplot(aes(xval,yval,fill=factor(xval)))
+  + geom_bar(stat="identity", width=0.4)
+  + xlab("Race")+ ylab("Total Count")
+  + labs(fill="Race")
+  + coord_flip()
+
+ggplot(race, aes(x=xval,y=yval,size=seq(min(yval),max(yval),length.out=length(yval)),color=xval))+geom_point()
 ```

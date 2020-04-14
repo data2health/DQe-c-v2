@@ -32,15 +32,21 @@ class Diff:
 
         tablelist = DQTBL[["TabNam", "ColNam", "Rows", "TotalSizeKB", "loaded", "primary"]].drop_duplicates()
         self.query.outputReport(tablelist, "tablelist.csv")
+
+
+        ## If none of the tables appear to be loaded, the program quits.
+        if len(tablelist[tablelist["loaded"]]) == 0:
+            print ("This database seems to be empty. See the tablelist.csv report for more information.")
+
         #tablelist.to_csv("reports/tablelist.csv")
 
         ## ======================================================================================
 
-        # removes all table and col references that are not loaded in the actual database
+        # removes all table and col references that are not loaded or are empty in the actual database
         # this is mainly so we don't try and query non-existant tables down the road
         # write the DQTBL object to query to track our progress
         
-        self.query.DQTBL = DQTBL[DQTBL["loaded"]]
+        self.query.DQTBL = DQTBL[(DQTBL["loaded"]) | (DQTBL["Rows"] == 0)]
 
 
     def dbSize(self):
@@ -121,7 +127,7 @@ class Diff:
                     cols.table_catalog='{self.query.database}' AND
                     cols.table_name = tabs.table_name
                     ;"""
-
+        
         output = pandas.read_sql(query, con=self.query.conn)
         output.columns = ["TabNam", "ColNam", "Rows", "TotalSizeKB"]
 

@@ -2,36 +2,33 @@
     {
         "indicator name": "blood pressure",
         "table": "MEASUREMENT", 
-        "col": "measurement_concept_id", 
+        "col": "measurement_concept_id",
+        "date": "measurement_date",
         "label": "BP",
         "concepts": [45876174,4326744]
     },
     {
-        "indicator name": "heart rate",
-        "table": "MEASUREMENT", 
-        "col": "measurement_concept_id", 
-        "label": "HR",
-        "concepts": [4239408]
-    },
-    {
         "indicator name": "height",
         "table": "MEASUREMENT", 
-        "col": "measurement_concept_id", 
+        "col": "measurement_concept_id",
+        "date": "measurement_date",
         "label": "Height",
         "concepts": [4177340,4087492,4154781,4275188,44804668]
     },
     {
         "indicator name": "weight",
         "table": "MEASUREMENT", 
-        "col": "measurement_concept_id", 
+        "col": "measurement_concept_id",
+        "date": "measurement_date",
         "label": "Weight",
         "concepts": [4181041,4184608,45876171,4103471,44804668,4030015]
     },
     {
         "indicator name": "smoking status",
         "table": "OBSERVATION", 
-        "col": "measurement_concept_id", 
-        "label": "Smoker",
+        "col": "observation_concept_id",
+        "date": "observation_date",
+        "label": "Smoking Status",
         "concepts": [4310250, 40299112, 40329177, 40298672, 40329167, 42536346, 46270534,
                             4144272, 45879404, 42872410, 40298657, 45883537, 45884038, 4298794,
                             40427925, 40299110, 45878118, 42709996, 45884037, 43530634, 4141786]
@@ -67,16 +64,34 @@
             8515,8516,8527,8557,8657]
     },
     {
+        "indicator name": "heart rate",
+        "table": "MEASUREMENT", 
+        "col": "measurement_concept_id",
+        "date": "measurement_date",
+        "label": "HR",
+        "concepts": [4239408]
+    },
+    {
         "indicator name": "Medications",
         "table": "drug_exposure",
         "col": "drug_exposure_id",
+        "date": "drug_exposure_start_date",
         "label": "Medication",
+        "concepts": false
+    },
+    {
+        "indicator name": "Procedures",
+        "table": "procedure_occurrence",
+        "col": "procedure_occurrence_id",
+        "date": "procedure_date",
+        "label": "Procedure",
         "concepts": false
     },
     {
         "indicator name": "Conditions",
         "table": "condition_occurrence",
         "col": "condition_occurrence_id",
+        "date": "condition_start_date",
         "label": "Condition",
         "concepts": false
     },
@@ -84,7 +99,23 @@
         "indicator name": "Visit",
         "table": "visit_occurrence",
         "col": "visit_occurrence_id",
+        "date": "visit_start_date",
         "label": "Visit",
+        "concepts": false
+    },
+    {
+        "indicator name": "Observations",
+        "table": "observation",
+        "col": "observation_id",
+        "date": "observation_date",
+        "label": "Observation",
+        "concepts": false
+    },
+    {
+        "indicator name": "Birth date",
+        "table": "person",
+        "col": "year_of_birth",
+        "label": "Birth date",
         "concepts": false
     }
 ]
