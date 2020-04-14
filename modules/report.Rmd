@@ -10,7 +10,8 @@ params:
 
 ```{r, echo=FALSE}
 library("reticulate")
-use_python("/anaconda/bin", required = T)
+#use_python("/anaconda/bin", required = T)
+use_condaenv("base")
 config = params$config
 outputDir = params$outputDir
 ```
