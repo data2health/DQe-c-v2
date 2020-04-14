@@ -11,7 +11,7 @@ params:
 ```{r, echo=FALSE}
 library("reticulate")
 #use_python("/anaconda/bin", required = T)
-use_condaenv("base")
+use_condaenv()
 config = params$config
 outputDir = params$outputDir
 ```
