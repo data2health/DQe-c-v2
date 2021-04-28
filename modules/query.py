@@ -27,7 +27,7 @@ class Query:
             self.CDM: str = self.config["CDM"].upper()
             if self.CDM == "":
                 raise NameError(f"A Common Data Model (CDM) has not been defined in {config_file}")
-            elif self.CDM not in ["PCORNET3","PCORNET31","OMOPV5_0","OMOPV5_2","OMOPV5_3"]:
+            elif self.CDM not in ["PCORNET3","PCORNET31","OMOPV5_0","OMOPV5_2","OMOPV5_3", "OMOPV6_0"]:
                 raise NameError(f"{self.CDM} is not a valid Common Data Model")
 
 
@@ -48,7 +48,8 @@ class Query:
                                     "PCORNET31": pandas.read_csv("./CDMs/DQTBL_pcornet_v31.csv"),
                                     "OMOPV5_0": pandas.read_csv("./CDMs/DQTBL_omop_v5_0.csv"),
                                     "OMOPV5_2": pandas.read_csv("./CDMs/DQTBL_omop_v5_2.csv"),
-                                    "OMOPV5_3": pandas.read_csv("./CDMs/DQTBL_omop_v5_3.csv")
+                                    "OMOPV5_3": pandas.read_csv("./CDMs/DQTBL_omop_v5_3.csv"),
+                                    "OMOPV6_0": pandas.read_csv("./CDMs/DQTBL_omop_v6_0.csv")
                                     ## Add new common data models here
                                 }[self.CDM]
 
