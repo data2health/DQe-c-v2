@@ -3,8 +3,6 @@ import pandas
 import subprocess
 import getpass
 from datetime import datetime
-import psycopg2 as postgresql
-import pyodbc as sqlserver
 import datetime
 from typing import Dict, List
 import json
@@ -99,10 +97,6 @@ class Query:
             if self.DBMS == "oracle":
                 ## cx_oracle can be difficult/finicky to download for new python users.
                 #  if oracle is not being used, we'll just skip this whole thing
-                try:
-                    import cx_Oracle as Oracle
-                except ModuleNotFoundError:
-                    import cx_oracle as Oracle
 
                 self.conn = self.Oracle()
             elif self.DBMS == "postgresql":
@@ -119,12 +113,17 @@ class Query:
 
 
     def Oracle(self):
-        conn = oracle.connect(self._user + "/" + self._password + "@" + self.database)
+        try:
+            import cx_Oracle as Oracle
+        except ModuleNotFoundError:
+            import cx_oracle as Oracle
+        conn = Oracle.connect(self._user + "/" + self._password + "@" + self.database)
 
         return conn
 
 
     def PostgreSQL(self):
+        import psycopg2 as postgresql
         conn = postgresql.connect(database=self.database,
                                   user=self._user,
                                   password=self._password,
@@ -134,6 +133,7 @@ class Query:
 
 
     def Redshift(self):
+        import psycopg2 as postgresql
         conn = postgresql.connect(database=self.database,
                                   user=self._user,
                                   password=self._password,
@@ -143,6 +143,7 @@ class Query:
 
 
     def SQLServer(self):
+        import pyodbc as sqlserver
         driver: str = self.config["ConnectionDetails"]["Driver"]
         conn = sqlserver.connect("DRIVER=" + driver +
                                  ";SERVER=" + self.host +
